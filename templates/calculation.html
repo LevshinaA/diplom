@@ -54,12 +54,7 @@
         button:hover {
             background-color: #45a049;
         }
-        .formula {
-            margin: 20px 0;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-        }
+        
         .profile-type {
             margin-bottom: 20px;
         }
@@ -69,6 +64,17 @@
         }
         .four-interval-fields {
             display: none;
+        }
+        .radio-group {
+            margin-bottom: 20px;
+        }
+        .radio-group label {
+            display: inline-block;
+            margin-right: 15px;
+            margin-bottom: 10px;
+        }
+        .radio-group input[type="radio"] {
+            margin-right: 5px;
         }
     </style>
 </head>
@@ -80,23 +86,37 @@
         
         <h1>Ввод исходных данных</h1>
         
-        <div class="profile-type">
+        <!-- Выбор типа профиля -->
+        <div class="radio-group">
+            <p>Выберите тип профиля:</p>
             <label>
-                <input type="radio" name="profile_type" value="three" checked> Трехинтервальный профиль
+                <input type="radio" name="profile_type" value="three" checked> 
+                Трехинтервальный профиль
             </label>
             <label>
-                <input type="radio" name="profile_type" value="four"> Четырехинтервальный профиль
+                <input type="radio" name="profile_type" value="four"> 
+                Четырехинтервальный профиль
             </label>
         </div>
 
-        <div class="formula">
-            <p id="profile-description">Для расчета трехинтервального профиля требуются следующие параметры:</p>
-        </div>
 
         <form action="/calculate" method="post">
             <input type="hidden" id="profile_type" name="profile_type" value="three">
             
-            <!-- Базовые поля -->
+            <!-- Выбор типа расчета -->
+            <div class="radio-group">
+                <p>Выберите тип расчета:</p>
+                <label>
+                    <input type="radio" name="calculation_type" value="angle_stabilization" checked> 
+                    Стабилизация угла
+                </label>
+                <label>
+                    <input type="radio" name="calculation_type" value="curvature_preservation">
+                    Сохранение кривизны
+                </label>
+            </div>
+
+            <!-- Существующие поля -->
             <div class="form-group">
                 <label for="H">H - Глубина скважины:</label>
                 <input type="number" id="H" name="H" step="0.1" required>
@@ -121,8 +141,15 @@
                 <span class="units">м</span>
             </div>
 
+            <!-- Новое поле для конечной глубины -->
+            <div class="form-group">
+                <label for="H_end">Конечная глубина:</label>
+                <input type="number" id="H_end" name="H_end" step="0.1">
+                <span class="units">м</span>
+            </div>
+
             <!-- Дополнительные поля для четырехинтервального профиля -->
-            <div class="four-interval-fields">
+            <div class="four-interval-fields" style="display: none;">
                 <div class="form-group">
                     <label for="initial_angle">α0 - Начальный зенитный угол:</label>
                     <input type="number" id="initial_angle" name="initial_angle" step="0.1">
@@ -146,25 +173,40 @@
                 const fourIntervalFields = document.querySelector('.four-interval-fields');
                 const profileDescription = document.getElementById('profile-description');
                 const hiddenProfileType = document.getElementById('profile_type');
+                const initialAngleInput = document.getElementById('initial_angle');
+                const R2Input = document.getElementById('R2');
                 
                 if (this.value === 'four') {
                     fourIntervalFields.style.display = 'block';
-                    profileDescription.textContent = 'Для расчета четырехинтервального профиля требуются следующие параметры:';
                     hiddenProfileType.value = 'four';
-                    
-                    // Делаем поля обязательными
-                    document.getElementById('initial_angle').required = true;
-                    document.getElementById('R2').required = true;
+                    initialAngleInput.required = true;
+                    R2Input.required = true;
                 } else {
                     fourIntervalFields.style.display = 'none';
-                    profileDescription.textContent = 'Для расчета трехинтервального профиля требуются следующие параметры:';
                     hiddenProfileType.value = 'three';
-                    
-                    // Убираем обязательность полей
-                    document.getElementById('initial_angle').required = false;
-                    document.getElementById('R2').required = false;
+                    initialAngleInput.required = false;
+                    R2Input.required = false;
                 }
             });
+        });
+
+        // Добавляем валидацию для поля конечной глубины
+        document.getElementById('H_end').addEventListener('change', function() {
+            const H = parseFloat(document.getElementById('H').value);
+            const H_end = parseFloat(this.value);
+            
+            if (H_end && H_end <= H) {
+                this.setCustomValidity('Конечная глубина должна быть больше глубины скважины');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        document.getElementById('H').addEventListener('change', function() {
+            const H_end = document.getElementById('H_end');
+            if (H_end.value) {
+                H_end.dispatchEvent(new Event('change'));
+            }
         });
     </script>
 </body>

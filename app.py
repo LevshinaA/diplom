@@ -43,11 +43,12 @@ def calculate():
             'H': float(request.form['H']),      # Глубина скважины
             'A': float(request.form['A']),      # Смещение от вертикали
             'Hv': float(request.form['Hv']),    # Длина вертикального участка
-            'R1': float(request.form['R1'])     # Радиус кривизны
+            'R1': float(request.form['R1']),    # Радиус кривизны
+            'calculation_type': request.form.get('calculation_type', 'angle_stabilization'),
+            'H_end': float(request.form.get('H_end', 0)) or None  # Конечная глубина
         }
         
         profile_type = request.form.get('profile_type', 'three')
-        profile_type_int = 1 if profile_type == 'three' else 2
         
         if profile_type == 'four':
             # Добавляем дополнительные параметры для четырехинтервального профиля
@@ -65,7 +66,7 @@ def calculate():
             first_row = results['table_data']['rows'][0]
             calculation_id = save_calculation_results(
                 depth=first_row['vertical_depth'],
-                profile_type=profile_type_int,
+                profile_type=2 if 'initial_angle_degrees' in results else 1,
                 results=results['table_data']
             )
             results['calculation_id'] = calculation_id
