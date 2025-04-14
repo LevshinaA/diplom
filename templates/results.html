@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результаты - Калькулятор</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .nav {
+            margin-bottom: 20px;
+        }
+        .nav a {
+            margin-right: 15px;
+            text-decoration: none;
+            color: #333;
+        }
+        .nav a:hover {
+            color: #666;
+        }
+        .results-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .error {
+            color: #dc3545;
+            padding: 10px;
+            background-color: #f8d7da;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .result-item {
+            margin-bottom: 10px;
+        }
+        .result-label {
+            font-weight: bold;
+        }
+        .input-data {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav">
+            <a href="/">Главная</a>
+        </div>
+        
+        <h1>Результаты расчета</h1>
+        
+        {% if results %}
+            {% if 'error' in results %}
+                <div class="error">
+                    {{ results.error }}
+                </div>
+            {% else %}
+                <div class="results-section">
+                    <div class="result-item">
+                        <span class="result-label">Зенитный угол α1:</span>
+                        {{ results.alpha1_degrees }}°
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Длина тангенциального участка L:</span>
+                        {{ results.L }} м
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">H0 (H - Hв):</span>
+                        {{ results.H0 }} м
+                    </div>
+                </div>
+
+                <h2>Параметры профиля скважины</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                {% for header in results.table_data.headers %}
+                                    <th>{{ header }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in results.table_data.rows %}
+                                <tr>
+                                    <td>{{ row.section }}</td>
+                                    <td>{{ row.vertical_depth }}</td>
+                                    <td>{{ row.wellbore_length }}</td>
+                                    <td>{{ row.interval_length }}</td>
+                                    <td>{{ row.displacement }}</td>
+                                    <td>{{ row.zenith_angle }}</td>
+                                    <td>{{ row.curvature_rate }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+
+            <div class="input-data">
+                <h3>Исходные данные:</h3>
+                <div class="result-item">
+                    <span class="result-label">Глубина скважины (H):</span>
+                    {{ results.input_data.H }} м
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Смещение от вертикали (A):</span>
+                    {{ results.input_data.A }} м
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Длина вертикального участка (Hв):</span>
+                    {{ results.input_data.Hv }} м
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Радиус кривизны (R1):</span>
+                    {{ results.input_data.R1 }} м
+                </div>
+            </div>
+        {% else %}
+            <p>Нет доступных результатов. Пожалуйста, выполните расчет.</p>
+        {% endif %}
+    </div>
+</body>
+</html> 

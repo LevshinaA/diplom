@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расчет - Калькулятор</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .nav {
+            margin-bottom: 20px;
+        }
+        .nav a {
+            margin-right: 15px;
+            text-decoration: none;
+            color: #333;
+        }
+        .nav a:hover {
+            color: #666;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            width: 200px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .units {
+            margin-left: 5px;
+            color: #666;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .formula {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav">
+            <a href="/">Главная</a>
+        </div>
+        
+        <h1>Ввод исходных данных</h1>
+        <div class="formula">
+            <p>Для расчета трех интервального профиля требуются следующие параметры:</p>
+        </div>
+        <form action="/calculate" method="post">
+            <div class="form-group">
+                <label for="H">H - Глубина скважины:</label>
+                <input type="number" id="H" name="H" step="0.1" required>
+                <span class="units">м</span>
+            </div>
+
+            <div class="form-group">
+                <label for="A">A - Смещение от вертикали:</label>
+                <input type="number" id="A" name="A" step="0.1" required>
+                <span class="units">м</span>
+            </div>
+
+            <div class="form-group">
+                <label for="Hv">Hв - Длина вертикального участка:</label>
+                <input type="number" id="Hv" name="Hv" step="0.1" required>
+                <span class="units">м</span>
+            </div>
+
+            <div class="form-group">
+                <label for="R1">R1 - Радиус кривизны:</label>
+                <input type="number" id="R1" name="R1" step="0.1" required>
+                <span class="units">м</span>
+            </div>
+
+            <button type="submit">Рассчитать</button>
+        </form>
+    </div>
+</body>
+</html> 

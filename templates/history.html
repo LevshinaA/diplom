@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>История расчетов</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .nav {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .nav a {
+            margin-right: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .nav a:hover {
+            background-color: #555;
+        }
+        .main-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .calculation-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .calculation-item {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            position: relative;
+        }
+        .calculation-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .calculation-item.active {
+            border-color: #007bff;
+            background-color: #e7f1ff;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        .info-value {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .timestamp {
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            padding: 5px;
+            font-size: 18px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+        }
+        .delete-btn:hover {
+            opacity: 1;
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+        .no-results {
+            text-align: center;
+            color: #666;
+            padding: 30px;
+            font-style: italic;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        .results-panel {
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .error {
+            color: #dc3545;
+            padding: 15px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .download-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .download-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav">
+            <a href="/">На главную</a>
+        </div>
+        
+        <div class="main-content">
+            <h2>История расчетов</h2>
+            {% if calculations %}
+                <ul class="calculation-list">
+                    {% for calc in calculations %}
+                        <li class="calculation-item" onclick="showResults('{{ calc.id }}')">
+                            <button class="delete-btn" onclick="deleteCalculation(event, '{{ calc.id }}')">&times;</button>
+                            <div class="info-label">Глубина скважины:</div>
+                            <div class="info-value">{{ calc.depth }} м</div>
+                            <div class="timestamp">{{ calc.timestamp }}</div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="no-results">История расчетов пуста</p>
+            {% endif %}
+            
+            <div class="results-panel">
+                <h2>Результаты расчета</h2>
+                <div id="results-content">
+                    <p>Выберите расчет для просмотра результатов</p>
+                </div>
+                <div class="action-buttons">
+                    <button id="download-excel" class="download-button" style="display: none;" onclick="downloadExcel()">
+                        Скачать Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentCalculationId = null;
+
+        function showResults(calculationId) {
+            currentCalculationId = calculationId;
+            document.getElementById('download-excel').style.display = 'block';
+            
+            // Подсветка выбранного расчета
+            document.querySelectorAll('.calculation-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // Загрузка результатов
+            fetch(`/get_calculation_data/${calculationId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById('results-content');
+                    if (data.error) {
+                        resultsDiv.innerHTML = `<p class="error">${data.error}</p>`;
+                        return;
+                    }
+
+                    // Создаем таблицу с результатами
+                    let tableHtml = '<table><thead><tr>';
+                    data.headers.forEach(header => {
+                        tableHtml += `<th>${header}</th>`;
+                    });
+                    tableHtml += '</tr></thead><tbody>';
+
+                    data.rows.forEach(row => {
+                        tableHtml += '<tr>';
+                        data.headers.forEach(header => {
+                            let value = '';
+                            if (header === 'Номер участка') value = row.section;
+                            else if (header === 'Глубина по вертикали, м') value = row.vertical_depth;
+                            else if (header === 'Длина ствола, м') value = row.wellbore_length;
+                            else if (header === 'Длина интервала, м') value = row.interval_length;
+                            else if (header === 'Смещение, м') value = row.displacement;
+                            else if (header === 'Зенитный угол, град.') value = row.zenith_angle;
+                            else if (header === 'Интенсивность искривления, град./10м') value = row.curvature_rate;
+                            tableHtml += `<td>${value !== null ? value : '-'}</td>`;
+                        });
+                        tableHtml += '</tr>';
+                    });
+                    tableHtml += '</tbody></table>';
+                    resultsDiv.innerHTML = tableHtml;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('results-content').innerHTML = 
+                        '<p class="error">Ошибка при загрузке результатов</p>';
+                });
+        }
+
+        function deleteCalculation(event, calculationId) {
+            event.stopPropagation(); // Предотвращаем открытие результатов при удалении
+            
+            if (confirm('Вы уверены, что хотите удалить этот расчет?')) {
+                fetch(`/delete_calculation/${calculationId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Удаляем элемент из DOM
+                        const item = event.target.closest('.calculation-item');
+                        item.remove();
+                        
+                        // Если это был последний расчет, показываем сообщение
+                        const list = document.querySelector('.calculation-list');
+                        if (!list.children.length) {
+                            list.innerHTML = '<p class="no-results">История расчетов пуста</p>';
+                        }
+                        
+                        // Очищаем панель результатов если был удален текущий расчет
+                        if (item.classList.contains('active')) {
+                            document.getElementById('results-content').innerHTML = 
+                                '<p class="no-results">Выберите расчет из истории для просмотра результатов</p>';
+                        }
+                    } else {
+                        alert('Ошибка при удалении расчета');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Ошибка при удалении расчета');
+                });
+            }
+        }
+
+        function downloadExcel() {
+            if (currentCalculationId) {
+                window.location.href = `/download_excel/${currentCalculationId}`;
+            }
+        }
+    </script>
+</body>
+</html> 
