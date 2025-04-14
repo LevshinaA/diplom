@@ -174,7 +174,9 @@
                             <button class="delete-btn" onclick="deleteCalculation(event, '{{ calc.id }}')">&times;</button>
                             <div class="info-label">Глубина скважины:</div>
                             <div class="info-value">{{ calc.depth }} м</div>
-                            <div class="info-value">{{ "Трехинтервальный" if calc.profile_type == 1 else "Четырехинтервальный" }}</div>
+                            <div class="info-value">
+                                {{ "Трехинтервальный" if calc.profile_type == 1 else "Четырехинтервальный" if calc.profile_type == 2 else "J-образный" if calc.profile_type == 3 else "S-образный" if calc.profile_type == 4 else "Неизвестный тип" }}
+                            </div>
                             <div class="timestamp">{{ calc.timestamp }}</div>
                         </li>
                     {% endfor %}

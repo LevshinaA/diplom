@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
-from calculations import calculate_profile, calculate_four_interval_profile
+from calculations import calculate_profile, calculate_four_interval_profile, calculate_j_shaped_profile, calculate_s_shaped_profile
 from database import init_db, save_calculation_results, get_calculation_results, get_all_calculations, delete_calculation
 from openpyxl import Workbook
 from datetime import datetime
@@ -40,18 +40,29 @@ def calculate():
     try:
         # Базовые параметры
         data = {
-            'H': float(request.form['H']),      # Глубина скважины
-            'A': float(request.form['A']),      # Смещение от вертикали
-            'Hv': float(request.form['Hv']),    # Длина вертикального участка
-            'R1': float(request.form['R1']),    # Радиус кривизны
+            'H': float(request.form['H']),
+            'A': float(request.form['A']),
+            'Hv': float(request.form['Hv']),
+            'R1': float(request.form['R1']),
             'calculation_type': request.form.get('calculation_type', 'angle_stabilization'),
-            'H_end': float(request.form.get('H_end', 0)) or None  # Конечная глубина
+            'H_end': float(request.form.get('H_end', 0)) or None
         }
         
         profile_type = request.form.get('profile_type', 'three')
         
-        if profile_type == 'four':
-            # Добавляем дополнительные параметры для четырехинтервального профиля
+        if profile_type in ['j-shaped', 's-shaped']:
+            # Добавляем параметры для J/S-образного профиля
+            data.update({
+                'initial_angle': float(request.form['initial_angle']),
+                'R2': float(request.form['R2']),
+                'R4': float(request.form['R4'])
+            })
+            if profile_type == 'j-shaped':
+                results = calculate_j_shaped_profile(**data)
+            else:
+                results = calculate_s_shaped_profile(**data)
+        elif profile_type == 'four':
+            # Параметры для четырехинтервального профиля
             data.update({
                 'initial_angle': float(request.form['initial_angle']),
                 'R2': float(request.form['R2'])

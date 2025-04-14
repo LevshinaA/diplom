@@ -3,46 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Расчет - Калькулятор</title>
+    <title>Расчет профиля скважины</title>
     <style>
+        /* Общие стили */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
+            background-color: #f5f5f5;
         }
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
+        /* Навигация */
         .nav {
             margin-bottom: 20px;
         }
         .nav a {
-            margin-right: 15px;
+            display: inline-block;
+            padding: 8px 15px;
             text-decoration: none;
             color: #333;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            margin-right: 10px;
         }
         .nav a:hover {
-            color: #666;
+            background-color: #e0e0e0;
         }
+
+        /* Группы радио-кнопок */
+        .radio-group {
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+        .radio-group p {
+            margin: 0 0 10px 0;
+            font-weight: bold;
+            color: #333;
+        }
+        .radio-group label {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .radio-group input[type="radio"] {
+            margin-right: 5px;
+        }
+
+        /* Поля ввода */
         .form-group {
             margin-bottom: 15px;
         }
-        label {
+        .form-group label {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
+            color: #333;
         }
-        input[type="number"] {
+        .form-group input[type="number"] {
             width: 200px;
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
+            font-size: 14px;
+        }
+        .form-group input[type="number"]:focus {
+            border-color: #4CAF50;
+            outline: none;
+            box-shadow: 0 0 3px rgba(76, 175, 80, 0.3);
         }
         .units {
             margin-left: 5px;
             color: #666;
         }
+
+        /* Дополнительные поля */
+        .profile-type-fields {
+            display: none;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        /* Кнопка расчета */
         button {
             background-color: #4CAF50;
             color: white;
@@ -50,59 +104,57 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
         }
         button:hover {
             background-color: #45a049;
         }
-        
-        .profile-type {
-            margin-bottom: 20px;
-        }
-        .profile-type label {
-            display: inline-block;
-            margin-right: 15px;
-        }
-        .four-interval-fields {
-            display: none;
-        }
-        .radio-group {
-            margin-bottom: 20px;
-        }
-        .radio-group label {
-            display: inline-block;
-            margin-right: 15px;
-            margin-bottom: 10px;
-        }
-        .radio-group input[type="radio"] {
-            margin-right: 5px;
+
+        /* Информационный блок */
+        .info-block {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+            border-left: 4px solid #4CAF50;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Навигация -->
         <div class="nav">
             <a href="/">Главная</a>
+            <a href="/history">История расчетов</a>
         </div>
         
-        <h1>Ввод исходных данных</h1>
-        
-        <!-- Выбор типа профиля -->
-        <div class="radio-group">
-            <p>Выберите тип профиля:</p>
-            <label>
-                <input type="radio" name="profile_type" value="three" checked> 
-                Трехинтервальный профиль
-            </label>
-            <label>
-                <input type="radio" name="profile_type" value="four"> 
-                Четырехинтервальный профиль
-            </label>
-        </div>
+        <h1>Расчет профиля скважины</h1>
 
-
-        <form action="/calculate" method="post">
+        <form action="/calculate" method="post" id="calculationForm">
             <input type="hidden" id="profile_type" name="profile_type" value="three">
-            
+
+            <!-- Выбор типа профиля -->
+            <div class="radio-group">
+                <p>Выберите тип профиля:</p>
+                <label>
+                    <input type="radio" name="profile_type_radio" value="three" checked> 
+                    Трехинтервальный профиль
+                </label>
+                <label>
+                    <input type="radio" name="profile_type_radio" value="four"> 
+                    Четырехинтервальный профиль
+                </label>
+                <label>
+                    <input type="radio" name="profile_type_radio" value="j-shaped"> 
+                    J-образный профиль
+                </label>
+                <label>
+                    <input type="radio" name="profile_type_radio" value="s-shaped"> 
+                    S-образный профиль
+                </label>
+            </div>
+
             <!-- Выбор типа расчета -->
             <div class="radio-group">
                 <p>Выберите тип расчета:</p>
@@ -116,40 +168,39 @@
                 </label>
             </div>
 
-            <!-- Существующие поля -->
+            <!-- Основные параметры -->
             <div class="form-group">
                 <label for="H">H - Глубина скважины:</label>
-                <input type="number" id="H" name="H" step="0.1" required>
+                <input type="number" id="H" name="H" step="0.1" min="0" required>
                 <span class="units">м</span>
             </div>
 
             <div class="form-group">
                 <label for="A">A - Смещение от вертикали:</label>
-                <input type="number" id="A" name="A" step="0.1" required>
+                <input type="number" id="A" name="A" step="0.1" min="0" required>
                 <span class="units">м</span>
             </div>
 
             <div class="form-group">
                 <label for="Hv">Hв - Длина вертикального участка:</label>
-                <input type="number" id="Hv" name="Hv" step="0.1" required>
+                <input type="number" id="Hv" name="Hv" step="0.1" min="0" required>
                 <span class="units">м</span>
             </div>
 
             <div class="form-group">
-                <label for="R1">R1 - Радиус кривизны:</label>
-                <input type="number" id="R1" name="R1" step="0.1" required>
+                <label for="R1">R1 - Радиус кривизны первого участка:</label>
+                <input type="number" id="R1" name="R1" step="0.1" min="0" required>
                 <span class="units">м</span>
             </div>
 
-            <!-- Новое поле для конечной глубины -->
             <div class="form-group">
                 <label for="H_end">Конечная глубина:</label>
-                <input type="number" id="H_end" name="H_end" step="0.1">
+                <input type="number" id="H_end" name="H_end" step="0.1" min="0">
                 <span class="units">м</span>
             </div>
 
             <!-- Дополнительные поля для четырехинтервального профиля -->
-            <div class="four-interval-fields" style="display: none;">
+            <div class="profile-type-fields" id="fourIntervalFields">
                 <div class="form-group">
                     <label for="initial_angle">α0 - Начальный зенитный угол:</label>
                     <input type="number" id="initial_angle" name="initial_angle" step="0.1">
@@ -157,8 +208,29 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="R2">R2 - Радиус кривизны третьего участка:</label>
+                    <label for="R2">R2 - Радиус кривизны второго участка:</label>
                     <input type="number" id="R2" name="R2" step="0.1">
+                    <span class="units">м</span>
+                </div>
+            </div>
+
+            <!-- Дополнительные поля для J/S-образного профиля -->
+            <div class="profile-type-fields" id="jsShapedFields">
+                <div class="form-group">
+                    <label for="initial_angle_js">α0 - Начальный зенитный угол:</label>
+                    <input type="number" id="initial_angle_js" name="initial_angle" step="0.1" required min="0">
+                    <span class="units">град.</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="R2_js">R2 - Радиус кривизны второго участка:</label>
+                    <input type="number" id="R2_js" name="R2" step="0.1" required min="0">
+                    <span class="units">м</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="R4">R4 - Радиус кривизны четвертого участка:</label>
+                    <input type="number" id="R4" name="R4" step="0.1" required min="0">
                     <span class="units">м</span>
                 </div>
             </div>
@@ -168,30 +240,118 @@
     </div>
 
     <script>
-        document.querySelectorAll('input[name="profile_type"]').forEach(radio => {
+        // Добавьте эту функцию в начало скрипта
+        function initializeFields() {
+            const profileType = document.querySelector('input[name="profile_type_radio"]:checked').value;
+            const fourIntervalFields = document.getElementById('fourIntervalFields');
+            const jsShapedFields = document.getElementById('jsShapedFields');
+            
+            // Скрываем все дополнительные поля
+            document.querySelectorAll('.profile-type-fields').forEach(field => {
+                field.style.display = 'none';
+            });
+            
+            // Сбрасываем обязательные поля
+            document.querySelectorAll('.profile-type-fields input').forEach(input => {
+                input.required = false;
+            });
+
+            // Показываем нужные поля в зависимости от выбранного типа
+            if (profileType === 'four') {
+                fourIntervalFields.style.display = 'block';
+                document.getElementById('initial_angle').required = true;
+                document.getElementById('R2').required = true;
+            } else if (profileType === 'j-shaped' || profileType === 's-shaped') {
+                jsShapedFields.style.display = 'block';
+                document.getElementById('initial_angle_js').required = true;
+                document.getElementById('R2_js').required = true;
+                document.getElementById('R4').required = true;
+            }
+        }
+
+        // Вызовите функцию при загрузке страницы
+        document.addEventListener('DOMContentLoaded', initializeFields);
+
+        // Функция валидации полей
+        function validateFields() {
+            const H = parseFloat(document.getElementById('H').value);
+            const H_end = parseFloat(document.getElementById('H_end').value);
+            const Hv = parseFloat(document.getElementById('Hv').value);
+
+            if (H_end && H_end <= H) {
+                alert('Конечная глубина должна быть больше глубины скважины');
+                return false;
+            }
+
+            if (Hv >= H) {
+                alert('Длина вертикального участка должна быть меньше глубины скважины');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Обработка изменения типа профиля
+        document.querySelectorAll('input[name="profile_type_radio"]').forEach(radio => {
             radio.addEventListener('change', function() {
-                const fourIntervalFields = document.querySelector('.four-interval-fields');
-                const profileDescription = document.getElementById('profile-description');
+                const fourIntervalFields = document.getElementById('fourIntervalFields');
+                const jsShapedFields = document.getElementById('jsShapedFields');
                 const hiddenProfileType = document.getElementById('profile_type');
-                const initialAngleInput = document.getElementById('initial_angle');
-                const R2Input = document.getElementById('R2');
                 
-                if (this.value === 'four') {
+                // Скрываем все дополнительные поля
+                document.querySelectorAll('.profile-type-fields').forEach(field => {
+                    field.style.display = 'none';
+                });
+                
+                // Сбрасываем обязательные поля
+                document.querySelectorAll('.profile-type-fields input').forEach(input => {
+                    input.required = false;
+                });
+
+                // Устанавливаем тип профиля и показываем нужные поля
+                let profileTypeValue;
+                if (this.value === 'three') {
+                    profileTypeValue = 1;
+                } else if (this.value === 'four') {
+                    profileTypeValue = 2;
                     fourIntervalFields.style.display = 'block';
-                    hiddenProfileType.value = 'four';
-                    initialAngleInput.required = true;
-                    R2Input.required = true;
-                } else {
-                    fourIntervalFields.style.display = 'none';
-                    hiddenProfileType.value = 'three';
-                    initialAngleInput.required = false;
-                    R2Input.required = false;
+                    document.getElementById('initial_angle').required = true;
+                    document.getElementById('R2').required = true;
+                } else if (this.value === 'j-shaped') {
+                    profileTypeValue = 3;
+                    jsShapedFields.style.display = 'block';
+                    document.getElementById('initial_angle_js').required = true;
+                    document.getElementById('R2_js').required = true;
+                    document.getElementById('R4').required = true;
+                } else if (this.value === 's-shaped') {
+                    profileTypeValue = 4;
+                    jsShapedFields.style.display = 'block';
+                    document.getElementById('initial_angle_js').required = true;
+                    document.getElementById('R2_js').required = true;
+                    document.getElementById('R4').required = true;
                 }
+                
+                hiddenProfileType.value = profileTypeValue;
             });
         });
 
-        // Добавляем валидацию для поля конечной глубины
-        document.getElementById('H_end').addEventListener('change', function() {
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            const defaultRadio = document.querySelector('input[name="profile_type_radio"]:checked');
+            if (defaultRadio) {
+                defaultRadio.dispatchEvent(new Event('change'));
+            }
+        });
+
+        // Валидация формы перед отправкой
+        document.getElementById('calculationForm').addEventListener('submit', function(e) {
+            if (!validateFields()) {
+                e.preventDefault();
+            }
+        });
+
+        // Валидация при изменении значений
+        document.getElementById('H_end').addEventListener('input', function() {
             const H = parseFloat(document.getElementById('H').value);
             const H_end = parseFloat(this.value);
             
@@ -202,10 +362,35 @@
             }
         });
 
-        document.getElementById('H').addEventListener('change', function() {
+        document.getElementById('H').addEventListener('input', function() {
             const H_end = document.getElementById('H_end');
             if (H_end.value) {
-                H_end.dispatchEvent(new Event('change'));
+                H_end.dispatchEvent(new Event('input'));
+            }
+        });
+
+        document.getElementById('calculationForm').addEventListener('submit', function(e) {
+            const inputs = this.querySelectorAll('input[type="number"]');
+            for (let input of inputs) {
+                // Пропускаем необязательные поля, если они пустые
+                if (!input.required && input.value === '') {
+                    continue;
+                }
+                
+                const value = parseFloat(input.value);
+                if (isNaN(value)) {
+                    e.preventDefault();
+                    alert(`Поле "${input.previousElementSibling.textContent}" должно содержать числовое значение`);
+                    input.focus();
+                    return;
+                }
+                
+                if (value < 0) {
+                    e.preventDefault();
+                    alert(`Поле "${input.previousElementSibling.textContent}" не может быть отрицательным`);
+                    input.focus();
+                    return;
+                }
             }
         });
     </script>
