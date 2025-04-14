@@ -60,6 +60,16 @@
             background-color: #f8f9fa;
             border-radius: 4px;
         }
+        .profile-type {
+            margin-bottom: 20px;
+        }
+        .profile-type label {
+            display: inline-block;
+            margin-right: 15px;
+        }
+        .four-interval-fields {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -69,10 +79,24 @@
         </div>
         
         <h1>Ввод исходных данных</h1>
-        <div class="formula">
-            <p>Для расчета трех интервального профиля требуются следующие параметры:</p>
+        
+        <div class="profile-type">
+            <label>
+                <input type="radio" name="profile_type" value="three" checked> Трехинтервальный профиль
+            </label>
+            <label>
+                <input type="radio" name="profile_type" value="four"> Четырехинтервальный профиль
+            </label>
         </div>
+
+        <div class="formula">
+            <p id="profile-description">Для расчета трехинтервального профиля требуются следующие параметры:</p>
+        </div>
+
         <form action="/calculate" method="post">
+            <input type="hidden" id="profile_type" name="profile_type" value="three">
+            
+            <!-- Базовые поля -->
             <div class="form-group">
                 <label for="H">H - Глубина скважины:</label>
                 <input type="number" id="H" name="H" step="0.1" required>
@@ -97,8 +121,51 @@
                 <span class="units">м</span>
             </div>
 
+            <!-- Дополнительные поля для четырехинтервального профиля -->
+            <div class="four-interval-fields">
+                <div class="form-group">
+                    <label for="initial_angle">α0 - Начальный зенитный угол:</label>
+                    <input type="number" id="initial_angle" name="initial_angle" step="0.1">
+                    <span class="units">град.</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="R2">R2 - Радиус кривизны третьего участка:</label>
+                    <input type="number" id="R2" name="R2" step="0.1">
+                    <span class="units">м</span>
+                </div>
+            </div>
+
             <button type="submit">Рассчитать</button>
         </form>
     </div>
+
+    <script>
+        document.querySelectorAll('input[name="profile_type"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const fourIntervalFields = document.querySelector('.four-interval-fields');
+                const profileDescription = document.getElementById('profile-description');
+                const hiddenProfileType = document.getElementById('profile_type');
+                
+                if (this.value === 'four') {
+                    fourIntervalFields.style.display = 'block';
+                    profileDescription.textContent = 'Для расчета четырехинтервального профиля требуются следующие параметры:';
+                    hiddenProfileType.value = 'four';
+                    
+                    // Делаем поля обязательными
+                    document.getElementById('initial_angle').required = true;
+                    document.getElementById('R2').required = true;
+                } else {
+                    fourIntervalFields.style.display = 'none';
+                    profileDescription.textContent = 'Для расчета трехинтервального профиля требуются следующие параметры:';
+                    hiddenProfileType.value = 'three';
+                    
+                    // Убираем обязательность полей
+                    document.getElementById('initial_angle').required = false;
+                    document.getElementById('R2').required = false;
+                }
+            });
+        });
+    </script>
 </body>
 </html> 

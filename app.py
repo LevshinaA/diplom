@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
-from calculations import calculate_profile
+from calculations import calculate_profile, calculate_four_interval_profile
 from database import init_db, save_calculation_results, get_calculation_results, get_all_calculations, delete_calculation
 from openpyxl import Workbook
 from datetime import datetime
@@ -28,11 +28,17 @@ def history():
 def results():
     if 'calculation_results' not in session:
         return redirect(url_for('calculation'))
-    return render_template('results.html', results=session['calculation_results'])
+    
+    results = session['calculation_results']
+    # Добавляем тип профиля к результатам
+    results['profile_type'] = 2 if 'initial_angle_degrees' in results else 1
+    
+    return render_template('results.html', results=results)
 
 @app.route('/calculate', methods=['POST'])
 def calculate():
     try:
+        # Базовые параметры
         data = {
             'H': float(request.form['H']),      # Глубина скважины
             'A': float(request.form['A']),      # Смещение от вертикали
@@ -40,8 +46,18 @@ def calculate():
             'R1': float(request.form['R1'])     # Радиус кривизны
         }
         
-        # Выполняем расчеты
-        results = calculate_profile(**data)
+        profile_type = request.form.get('profile_type', 'three')
+        profile_type_int = 1 if profile_type == 'three' else 2
+        
+        if profile_type == 'four':
+            # Добавляем дополнительные параметры для четырехинтервального профиля
+            data.update({
+                'initial_angle': float(request.form['initial_angle']),
+                'R2': float(request.form['R2'])
+            })
+            results = calculate_four_interval_profile(**data)
+        else:
+            results = calculate_profile(**data)
         
         # Сохраняем результаты в базу данных
         if 'error' not in results:
@@ -49,7 +65,7 @@ def calculate():
             first_row = results['table_data']['rows'][0]
             calculation_id = save_calculation_results(
                 depth=first_row['vertical_depth'],
-                displacement=first_row['displacement'],
+                profile_type=profile_type_int,
                 results=results['table_data']
             )
             results['calculation_id'] = calculation_id
@@ -125,19 +141,20 @@ def download_excel(calculation_id):
             'Интенсивность искривления, град./10м'
         ]
         
-        # Записываем заголовки
+        # Записываем заголовки в первую строку
         for col, header in enumerate(headers, 1):
             ws.cell(row=1, column=col, value=header)
 
-        # Записываем данные
-        for row_idx, row in enumerate(data['results']['rows'], 2):
-            ws.cell(row=row_idx, column=1, value=row['section'])
-            ws.cell(row=row_idx, column=2, value=row['vertical_depth'])
-            ws.cell(row=row_idx, column=3, value=row['wellbore_length'])
-            ws.cell(row=row_idx, column=4, value=row['interval_length'])
-            ws.cell(row=row_idx, column=5, value=row['displacement'])
-            ws.cell(row=row_idx, column=6, value=row['zenith_angle'])
-            ws.cell(row=row_idx, column=7, value=row['curvature_rate'])
+        # Записываем данные точно так же, как в вашем коде
+        for row in range(4):
+            row_data = data['results']['rows'][row]
+            ws.cell(row=row+2, column=1, value=row_data['section'])
+            ws.cell(row=row+2, column=2, value=row_data['vertical_depth'])
+            ws.cell(row=row+2, column=3, value=row_data['wellbore_length'])
+            ws.cell(row=row+2, column=4, value=row_data['interval_length'])
+            ws.cell(row=row+2, column=5, value=row_data['displacement'])
+            ws.cell(row=row+2, column=6, value=row_data['zenith_angle'])
+            ws.cell(row=row+2, column=7, value=row_data['curvature_rate'])
 
         # Настраиваем ширину столбцов
         for col in range(1, len(headers) + 1):

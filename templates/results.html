@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Результаты - Калькулятор</title>
+    <title>Результаты расчета</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -70,85 +70,157 @@
             overflow-x: auto;
             margin-top: 20px;
         }
+        .additional-params {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .param-group {
+            margin-bottom: 10px;
+        }
+        .param-label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="nav">
             <a href="/">Главная</a>
+            <a href="/calculation">Новый расчет</a>
+            <a href="/history">История расчетов</a>
         </div>
-        
+
         <h1>Результаты расчета</h1>
-        
-        {% if results %}
-            {% if 'error' in results %}
-                <div class="error">
-                    {{ results.error }}
+
+        {% if results.error %}
+            <div class="error">
+                {{ results.error }}
+            </div>
+            <div class="input-data">
+                <h3>Введенные данные:</h3>
+                <ul>
+                    {% for key, value in results.input_data.items() %}
+                        <li>{{ key }}: {{ value }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% else %}
+            <!-- Общие параметры -->
+            <div class="additional-params">
+                <h3>Основные параметры:</h3>
+                <div class="param-group">
+                    <span class="param-label">Тип профиля:</span>
+                    <span>{{ "Трехинтервальный" if results.profile_type == 1 else "Четырехинтервальный" }}</span>
+                </div>
+                <div class="param-group">
+                    <span class="param-label">H0:</span>
+                    <span>{{ results.H0 }} м</span>
+                </div>
+                <div class="param-group">
+                    <span class="param-label">L:</span>
+                    <span>{{ results.L }} м</span>
+                </div>
+            </div>
+
+            <!-- Специфичные параметры для разных типов профиля -->
+            {% if results.profile_type == 1 %}
+                <!-- Параметры для трехинтервального профиля -->
+                <div class="additional-params">
+                    <h3>Параметры трехинтервального профиля:</h3>
+                    <div class="param-group">
+                        <span class="param-label">Зенитный угол α1:</span>
+                        <span>{{ results.alpha1_degrees }}°</span>
+                    </div>
                 </div>
             {% else %}
-                <div class="results-section">
-                    <div class="result-item">
-                        <span class="result-label">Зенитный угол α1:</span>
-                        {{ results.alpha1_degrees }}°
+                <!-- Параметры для четырехинтервального профиля -->
+                <div class="additional-params">
+                    <h3>Параметры четырехинтервального профиля:</h3>
+                    <div class="param-group">
+                        <span class="param-label">Начальный зенитный угол:</span>
+                        <span>{{ results.initial_angle_degrees }}°</span>
                     </div>
-                    <div class="result-item">
-                        <span class="result-label">Длина тангенциального участка L:</span>
-                        {{ results.L }} м
+                    <div class="param-group">
+                        <span class="param-label">Второй зенитный угол:</span>
+                        <span>{{ results.second_angle_degrees }}°</span>
                     </div>
-                    <div class="result-item">
-                        <span class="result-label">H0 (H - Hв):</span>
-                        {{ results.H0 }} м
+                    <div class="param-group">
+                        <span class="param-label">Q1:</span>
+                        <span>{{ results.Q1 }} м</span>
                     </div>
-                </div>
-
-                <h2>Параметры профиля скважины</h2>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                {% for header in results.table_data.headers %}
-                                    <th>{{ header }}</th>
-                                {% endfor %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in results.table_data.rows %}
-                                <tr>
-                                    <td>{{ row.section }}</td>
-                                    <td>{{ row.vertical_depth }}</td>
-                                    <td>{{ row.wellbore_length }}</td>
-                                    <td>{{ row.interval_length }}</td>
-                                    <td>{{ row.displacement }}</td>
-                                    <td>{{ row.zenith_angle }}</td>
-                                    <td>{{ row.curvature_rate }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <div class="param-group">
+                        <span class="param-label">B:</span>
+                        <span>{{ results.B }} м</span>
+                    </div>
+                    <div class="param-group">
+                        <span class="param-label">A1:</span>
+                        <span>{{ results.A1 }} м</span>
+                    </div>
+                    <div class="param-group">
+                        <span class="param-label">C:</span>
+                        <span>{{ results.C }} м</span>
+                    </div>
+                    <div class="param-group">
+                        <span class="param-label">T:</span>
+                        <span>{{ results.T }} м</span>
+                    </div>
+                    <div class="param-group">
+                        <span class="param-label">KOR:</span>
+                        <span>{{ results.KOR }} м</span>
+                    </div>
+                    <div class="param-group">
+                        <span class="param-label">T0:</span>
+                        <span>{{ results.T0 }}</span>
+                    </div>
+                    <div class="param-group">
+                        <span class="param-label">H_ost:</span>
+                        <span>{{ results.H_ost }} м</span>
+                    </div>
+                    <div class="param-group">
+                        <span class="param-label">A_ost:</span>
+                        <span>{{ results.A_ost }} м</span>
+                    </div>
                 </div>
             {% endif %}
 
-            <div class="input-data">
-                <h3>Исходные данные:</h3>
-                <div class="result-item">
-                    <span class="result-label">Глубина скважины (H):</span>
-                    {{ results.input_data.H }} м
-                </div>
-                <div class="result-item">
-                    <span class="result-label">Смещение от вертикали (A):</span>
-                    {{ results.input_data.A }} м
-                </div>
-                <div class="result-item">
-                    <span class="result-label">Длина вертикального участка (Hв):</span>
-                    {{ results.input_data.Hv }} м
-                </div>
-                <div class="result-item">
-                    <span class="result-label">Радиус кривизны (R1):</span>
-                    {{ results.input_data.R1 }} м
-                </div>
+            <!-- Таблица результатов -->
+            <div class="results-table">
+                <h3>Результаты расчета по участкам:</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            {% for header in results.table_data.headers %}
+                                <th>{{ header }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in results.table_data.rows %}
+                            <tr>
+                                <td>{{ row.section }}</td>
+                                <td>{{ row.vertical_depth }}</td>
+                                <td>{{ row.wellbore_length }}</td>
+                                <td>{{ row.interval_length }}</td>
+                                <td>{{ row.displacement }}</td>
+                                <td>{{ row.zenith_angle }}</td>
+                                <td>{{ row.curvature_rate }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-        {% else %}
-            <p>Нет доступных результатов. Пожалуйста, выполните расчет.</p>
+
+            <!-- Кнопка для скачивания Excel -->
+            {% if results.calculation_id %}
+                <div class="download-section">
+                    <a href="{{ url_for('download_excel', calculation_id=results.calculation_id) }}" class="download-button">
+                        Скачать результаты в Excel
+                    </a>
+                </div>
+            {% endif %}
         {% endif %}
     </div>
 </body>
