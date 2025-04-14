@@ -4,25 +4,25 @@ from math import pi, sqrt, sin, cos, atan, radians, degrees, tan
 def create_table_headers():
     """Возвращает заголовки таблицы результатов"""
     return [
-                'Номер участка',
-                'Глубина по вертикали, м',
-                'Длина ствола, м',
-                'Длина интервала, м',
-                'Смещение, м',
-                'Зенитный угол, град.',
-                'Интенсивность искривления, град./10м'
+        'Номер участка',
+        'Глубина по вертикали, м',
+        'Длина ствола, м',
+        'Длина интервала, м',
+        'Смещение, м',
+        'Зенитный угол, град.',
+        'Интенсивность искривления, град./10м'
     ]
 
 def create_vertical_section(Hv):
     """Создает данные для вертикального участка"""
     return {
-                    'section': 1,
-                    'vertical_depth': round(Hv, 2),
-                    'wellbore_length': round(Hv, 2),
-                    'interval_length': round(Hv, 2),
-                    'displacement': 0,
-                    'zenith_angle': 0,
-                    'curvature_rate': 0
+        'section': 1,
+        'vertical_depth': round(Hv, 2),
+        'wellbore_length': round(Hv, 2),
+        'interval_length': round(Hv, 2),
+        'displacement': 0,
+        'zenith_angle': 0,
+        'curvature_rate': 0
     }
 
 def create_angle_build_section(section_num, prev_depth, prev_length, R, angle, displacement):
@@ -68,8 +68,8 @@ def create_extra_section(section_num, H_end, H, prev_length, A, calculation_type
         'interval_length': round(interval_length, 2),
         'displacement': round(new_displacement, 2),
         'zenith_angle': round(new_angle, 2),
-                    'curvature_rate': 0
-                }
+        'curvature_rate': 0
+    }
 
 def calculate_profile(H, A, Hv, R1, calculation_type='angle_stabilization', H_end=None):
     """Расчет параметров трехинтервального профиля скважины"""
@@ -150,8 +150,6 @@ def calculate_four_interval_profile(H, A, Hv, R1, initial_angle, R2, calculation
                     Hv + R1 * sin(radians(initial_angle)),
                     Hv + (pi * R1 * initial_angle) / 180,
                     R2, ang_2 - initial_angle,
-                    R1 * (1 - cos(radians(initial_angle))) + 
-                    R2 * (cos(radians(initial_angle)) - cos(radians(ang_2))),
                     R1 * (1 - cos(radians(initial_angle))) + 
                     R2 * (cos(radians(initial_angle)) - cos(radians(ang_2)))),
                 create_tangent_section(4,
@@ -324,4 +322,4 @@ def calculate_s_shaped_profile(H, A, Hv, R1, initial_angle, R2, R4, calculation_
                 'initial_angle': initial_angle, 'R2': R2, 'R4': R4,
                 'calculation_type': calculation_type, 'H_end': H_end
             }
-        } 
+        }

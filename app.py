@@ -4,6 +4,7 @@ from database import init_db, save_calculation_results, get_calculation_results,
 from openpyxl import Workbook
 from datetime import datetime
 import os
+from math import pi, sqrt, sin, cos, atan, radians, degrees, tan
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'  # Необходимо для использования session
@@ -38,6 +39,8 @@ def results():
 @app.route('/calculate', methods=['POST'])
 def calculate():
     try:
+        print("Form data:", dict(request.form))  # Отладочный вывод
+        
         # Базовые параметры
         data = {
             'H': float(request.form['H']),
@@ -48,41 +51,40 @@ def calculate():
             'H_end': float(request.form.get('H_end', 0)) or None
         }
         
-        profile_type = request.form.get('profile_type', 'three')
+        # Получаем тип профиля как число
+        profile_type = int(request.form.get('profile_type', 1))
+        print("Profile type:", profile_type)  # Отладочный вывод
         
-        if profile_type in ['j-shaped', 's-shaped']:
+        if profile_type in [3, 4]:  # J-образный или S-образный
             # Добавляем параметры для J/S-образного профиля
             data.update({
                 'initial_angle': float(request.form['initial_angle']),
                 'R2': float(request.form['R2']),
                 'R4': float(request.form['R4'])
             })
-            if profile_type == 'j-shaped':
+            if profile_type == 3:
                 results = calculate_j_shaped_profile(**data)
             else:
                 results = calculate_s_shaped_profile(**data)
-        elif profile_type == 'four':
-            # Параметры для четырехинтервального профиля
+        elif profile_type == 2:  # Четырехинтервальный
             data.update({
                 'initial_angle': float(request.form['initial_angle']),
                 'R2': float(request.form['R2'])
             })
             results = calculate_four_interval_profile(**data)
-        else:
+        else:  # Трехинтервальный
             results = calculate_profile(**data)
         
         # Сохраняем результаты в базу данных
         if 'error' not in results:
-            # Получаем глубину и смещение из первой строки результатов
-            first_row = results['table_data']['rows'][0]
             calculation_id = save_calculation_results(
-                depth=first_row['vertical_depth'],
-                profile_type=2 if 'initial_angle_degrees' in results else 1,
+                depth=data['H'],
+                profile_type=profile_type,
                 results=results['table_data']
             )
             results['calculation_id'] = calculation_id
+            results['profile_type'] = profile_type
         
-        # Сохраняем результаты в сессии для отображения
         session['calculation_results'] = results
         
     except ValueError as e:
