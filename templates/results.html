@@ -113,7 +113,7 @@
                 <h3>Основные параметры:</h3>
                 <div class="param-group">
                     <span class="param-label">Тип профиля:</span>
-                    <span>{{ "Трехинтервальный" if results.profile_type == 1 else "Четырехинтервальный" }}</span>
+                    <span>{{ "Трехинтервальный" if results.profile_type == 1 else "Четырехинтервальный" if results.profile_type == 2 else "J-образный" if results.profile_type == 3 else "S-образный" if results.profile_type == 4 }}</span>
                 </div>
                 <div class="param-group">
                     <span class="param-label">H0:</span>

@@ -5,13 +5,12 @@ def init_db():
     """Инициализация базы данных"""
     conn = sqlite3.connect('calculations.db')
     c = conn.cursor()
-    
-    # Проверяем существующую структуру таблицы
+
     c.execute("PRAGMA table_info(calculations)")
     columns = [column[1] for column in c.fetchall()]
     
     if not columns:
-        # Если таблица не существует, создаем новую
+
         c.execute('''
             CREATE TABLE calculations (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,10 +21,8 @@ def init_db():
             )
         ''')
     elif 'displacement' in columns:
-        # Сначала удаляем таблицу calculations_new, если она существует
         c.execute('DROP TABLE IF EXISTS calculations_new')
-        
-        # Создаем новую таблицу
+
         c.execute('''
             CREATE TABLE calculations_new (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,8 +32,7 @@ def init_db():
                 results TEXT
             )
         ''')
-        
-        # Копируем существующие данные с преобразованием
+
         c.execute('''
             INSERT INTO calculations_new (id, depth, profile_type, timestamp, results)
             SELECT 
@@ -47,8 +43,7 @@ def init_db():
                 results
             FROM calculations
         ''')
-        
-        # Удаляем старую таблицу и переименовываем новую
+
         c.execute('DROP TABLE calculations')
         c.execute('ALTER TABLE calculations_new RENAME TO calculations')
     

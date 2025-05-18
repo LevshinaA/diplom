@@ -74,7 +74,7 @@ def create_extra_section(section_num, H_end, H, prev_length, A, calculation_type
 def calculate_profile(H, A, Hv, R1, calculation_type='angle_stabilization', H_end=None):
     """Расчет параметров трехинтервального профиля скважины"""
     try:
-        # Основные расчеты
+
         H0 = H - Hv
         discriminant = H0**2 - 4*(2*R1 - A)
         if discriminant < 0:
@@ -84,7 +84,6 @@ def calculate_profile(H, A, Hv, R1, calculation_type='angle_stabilization', H_en
         alpha1_degrees = degrees(alpha1)
         L = (A - R1*(1 - cos(alpha1)))/sin(alpha1)
 
-        # Формируем таблицу результатов
         table_data = {
             'headers': create_table_headers(),
             'rows': [
@@ -97,7 +96,6 @@ def calculate_profile(H, A, Hv, R1, calculation_type='angle_stabilization', H_en
             ]
         }
 
-        # Добавляем дополнительный участок если нужно
         if H_end and H_end > H:
             table_data['rows'].append(
                 create_extra_section(4, H_end, H, 
@@ -128,7 +126,7 @@ def calculate_profile(H, A, Hv, R1, calculation_type='angle_stabilization', H_en
 def calculate_four_interval_profile(H, A, Hv, R1, initial_angle, R2, calculation_type='angle_stabilization', H_end=None):
     """Расчет параметров четырехинтервального профиля скважины"""
     try:
-        # Основные расчеты
+
         H_0 = H - Hv
         Q_1 = H_0 - R1 * sin(radians(initial_angle))
         B = R1 * (1 - cos(radians(initial_angle))) + Q_1 * tan(radians(initial_angle))
@@ -139,7 +137,7 @@ def calculate_four_interval_profile(H, A, Hv, R1, initial_angle, R2, calculation
         T_0 = (R2 * (R2 - T) + C * KOR) / ((R2 - T) ** 2 + C ** 2)
         ang_2 = 90 - degrees(atan(T_0 / sqrt(1 - T_0 ** 2))) + initial_angle
 
-        # Формируем таблицу результатов
+
         table_data = {
             'headers': create_table_headers(),
             'rows': [
@@ -159,7 +157,6 @@ def calculate_four_interval_profile(H, A, Hv, R1, initial_angle, R2, calculation
             ]
         }
 
-        # Добавляем дополнительный участок если нужно
         if H_end and H_end > H:
             table_data['rows'].append(
                 create_extra_section(5, H_end, H,
@@ -198,14 +195,13 @@ def calculate_four_interval_profile(H, A, Hv, R1, initial_angle, R2, calculation
 def calculate_j_shaped_profile(H, A, Hv, R1, initial_angle, R2, R4, calculation_type='angle_stabilization', H_end=None):
     """Расчет параметров J-образного профиля скважины"""
     try:
-        # Основные расчеты
+
         B = R1 * (1 - cos(radians(initial_angle))) + (H - Hv - R1 * sin(radians(initial_angle))) * tan(radians(initial_angle))
         Q = sqrt(2 * R4 * abs(A - B) * cos(radians(initial_angle)) - (A - B) ** 2 * (cos(radians(initial_angle)) ** 2))
         C = ((H - Hv - R1 * sin(radians(initial_angle))) / cos(radians(initial_angle))) + abs(A - B) * sin(radians(initial_angle))
         L = C - Q
         ang_p = initial_angle + degrees(atan(Q / sqrt(R4 ** 2 - Q ** 2)))
 
-        # Формируем таблицу результатов
         table_data = {
             'headers': create_table_headers(),
             'rows': [
@@ -224,7 +220,6 @@ def calculate_j_shaped_profile(H, A, Hv, R1, initial_angle, R2, R4, calculation_
             ]
         }
 
-        # Добавляем дополнительный участок если нужно
         if H_end and H_end > H:
             table_data['rows'].append(
                 create_extra_section(5, H_end, H,
@@ -292,7 +287,6 @@ def calculate_s_shaped_profile(H, A, Hv, R1, initial_angle, R2, R4, calculation_
             ]
         }
 
-        # Добавляем дополнительный участок если нужно
         if H_end and H_end > H:
             table_data['rows'].append(
                 create_extra_section(5, H_end, H,
