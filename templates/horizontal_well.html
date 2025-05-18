@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расчет горизонтальной скважины</title>
+    
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --secondary-color: #1976D2;
+            --background-color: #f5f7fa;
+            --card-background: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border-color: #e0e0e0;
+            --error-color: #f44336;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px; /* Увеличиваем максимальную ширину для единообразия */
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .nav {
+            background-color: var(--card-background);
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: var(--primary-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav a:hover {
+            background-color: rgba(33, 150, 243, 0.1);
+        }
+
+        .main-content {
+            background: var(--card-background);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+            outline: none;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            color: var(--error-color);
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+        
+        
+        /* Стили для скрытых полей, если они не обрабатываются скриптом напрямую */
+        .hidden-field {
+            display: none;
+        }
+
+        /* Стили для заголовка страницы с типом скважины */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .page-header h2 {
+             color: var(--primary-color);
+             margin: 0; /* Убираем лишний отступ у заголовка */
+        }
+
+        .select{
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(33, 150, 243, 0.05);
+            border-radius: 8px;
+        }
+        .well-type-display {
+            background: rgba(33, 150, 243, 0.1);
+            color: var(--primary-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+         @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+             .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav">
+            <a href="/">На главную</a>
+            <a href="/well_type_selection">Выбор типа скважины</a>
+        </div>
+
+        <div class="main-content">
+            
+            <form id="horizontalWellForm" method="POST" action="/calculate_horizontal">
+                
+                <!-- Секция выбора типа скважины -->
+                
+                <div class="form-section">
+                    <h2>Выбор вида частей</h2>
+                    <div class="select">
+                    <div class="form-grid">
+                         <div class="form-group">
+                            <label for="type_ha" class="form-label">Вид направляющей части </label>
+                            <select class="form-select" id="type_ha" name="type_ha" required>
+                                <option value="">Выберите вид</option>
+                                <option value="1">Двухинтервальный</option>
+                                <option value="2">Трехинтервальный</option>
+                                <option value="3">Четырехинтервальный-тангенциальный</option>
+                                <option value="4">Пятиинтервальный-тангенциальный</option>
+                                <option value="5">Четырехинтервальный</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="type_h" class="form-label">Вид горизонтальной части</label>
+                            <select class="form-select" id="type_h" name="type_h" required>
+                                <option value="">Выберите вид</option>
+                                <option value="0">Тангенциальный</option>
+                                <option value="-1">Нисходящий</option>
+                                <option value="1">Восходящий</option>
+                                <option value="2">Волнообразный</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                <!-- Секция параметров направляющей части -->
+                <div class="form-section">
+                    <h2>Параметры направляющей части</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="depth" class="form-label">Проектная глубина профиля, м</label>
+                            <input type="number" class="form-control" id="depth" name="depth" step="0.01" required>
+                        </div>
+    
+                        <div class="form-group">
+                            <label for="displacement" class="form-label">Смещение профиля на проектной глубине, м</label>
+                            <input type="number" class="form-control" id="displacement" name="displacement" step="0.01" required>
+                        </div>
+    
+                        <div class="form-group">
+                            <label for="angle" class="form-label">Угол на проектной глубине, град.</label>
+                            <input type="number" class="form-control" id="angle" name="angle" step="0.01" required>
+                        </div>
+                        <div class="form-group" id="radiusCurve2Div">
+                            <label for="radius_curve_2" class="form-label">Радиус кривизны 2 участка, м</label>
+                            <input type="number" class="form-control" id="radius_curve_2" name="radius_curve_2" step="0.01" required>
+                        </div>
+
+                        <div class="form-group" id="radiusCurve3Div">
+                            <label for="radius_curve_3" class="form-label">Радиус кривизны 3 участка, 3</label>
+                            <input type="number" class="form-control" id="radius_curve_3" name="radius_curve_3" step="0.01" required>
+                        </div>
+
+                        <div class="form-group" id="radiusCurve4Div">
+                            <label for="radius_curve_4" class="form-label">Радиус кривизны 4 участка, м</label>
+                            <input type="number" class="form-control" id="radius_curve_4" name="radius_curve_4" step="0.01" required>
+                        </div>
+
+                        <div class="form-group" id="radiusCurve5Div">
+                            <label for="radius_curve_5" class="form-label">Радиус кривизны 5 участка, м</label>
+                            <input type="number" class="form-control" id="radius_curve_5" name="radius_curve_5" step="0.01" required>
+                        </div>
+
+                        <div class="form-group" id="angle4Div">
+                            <label for="angle_4" class="form-label">Угол в конце 4 участка, м</label>
+                            <input type="number" class="form-control" id="angle_4" name="angle_4" step="0.01" required>
+                        </div>
+
+                        <div class="form-group" id="angle3Div">
+                            <label for="angle_3" class="form-label">Угол в конце 3 участка, м</label>
+                            <input type="number" class="form-control" id="angle_3" name="angle_3" step="0.01" required>
+                        </div>
+
+                        <div class="form-group" id="zenithAngleDiv">
+                            <label for="zenith_angle" class="form-label">Начальный зенитный угол, град.</label>
+                            <input type="number" class="form-control" id="zenith_angle" name="zenith_angle" step="0.01" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Секция параметров горизонтальной части -->
+                 <div class="form-section">
+                    <h2>Параметры горизонтальной части</h2>
+                    <div class="form-grid">
+                        <div class="form-group" id="lengthHorDiv">
+                            <label for="length_hor" class="form-label">Протяжённость горизонтального участка, м</label>
+                            <input type="number" class="form-control" id="length_hor" name="length_hor" step="0.01">
+                        </div>
+
+                        <div class="form-group" id="deviationDownDiv">
+                            <label for="deviation_down" class="form-label">Допустимое отклонение вниз, м</label>
+                            <input type="number" class="form-control" id="deviation_down" name="deviation_down" step="0.01">
+                        </div>
+
+                        <div class="form-group" id="deviationUpDiv">
+                            <label for="deviation_up" class="form-label">Допустимое отклонение вверх, м</label>
+                            <input type="number" class="form-control" id="deviation_up" name="deviation_up" step="0.01">
+                        </div>
+
+                        <div class="form-group" id="radiusCurveDiv">
+                            <label for="radius_curve" class="form-label">Радиус кривизны участка А - В, м</label>
+                            <input type="number" class="form-control" id="radius_curve" name="radius_curve" step="0.01">
+                        </div>
+                    </div>
+                 </div>
+
+                <button type="submit" class="btn btn-primary">Рассчитать</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const typeHSelect = document.getElementById('type_h');
+            const typeHaSelect = document.getElementById('type_ha');
+            const lengthHorDiv = document.getElementById('lengthHorDiv');
+            const deviationDownDiv = document.getElementById('deviationDownDiv');
+            const deviationUpDiv = document.getElementById('deviationUpDiv');
+            const radiusCurveDiv = document.getElementById('radiusCurveDiv');
+            const radiusCurve2Div = document.getElementById('radiusCurve2Div');
+            const zenithAngleDiv = document.getElementById('zenithAngleDiv');
+            const radiusCurve4Div = document.getElementById('radiusCurve4Div');
+            const radiusCurve5Div = document.getElementById('radiusCurve5Div');
+            const angle4Div = document.getElementById('angle4Div');
+            const angle3Div = document.getElementById('angle3Div');
+            const radiusCurve3Div = document.getElementById('radiusCurve3Div');
+
+            function hideAll() {
+                lengthHorDiv.style.display = 'none';
+                deviationDownDiv.style.display = 'none';
+                deviationUpDiv.style.display = 'none';
+                radiusCurveDiv.style.display = 'none';
+                radiusCurve2Div.style.display = 'none';
+                zenithAngleDiv.style.display = 'none';
+                radiusCurve4Div.style.display = 'none';
+                radiusCurve5Div.style.display = 'none';
+                angle4Div.style.display = 'none';
+                angle3Div.style.display = 'none';
+                radiusCurve3Div.style.display = 'none';
+
+                // Remove required attribute from all fields when hidden
+                document.getElementById('length_hor').removeAttribute('required');
+                document.getElementById('deviation_down').removeAttribute('required');
+                document.getElementById('deviation_up').removeAttribute('required');
+                document.getElementById('radius_curve').removeAttribute('required');
+                document.getElementById('radius_curve_2').removeAttribute('required');
+                document.getElementById('zenith_angle').removeAttribute('required');
+                document.getElementById('radius_curve_4').removeAttribute('required');
+                document.getElementById('radius_curve_5').removeAttribute('required');
+                document.getElementById('angle_4').removeAttribute('required');
+                document.getElementById('angle_3').removeAttribute('required');
+                document.getElementById('radius_curve_3').removeAttribute('required');
+            }
+
+            function updateFields() {
+                hideAll();
+                if (typeHaSelect.value === '2') {
+                    radiusCurve2Div.style.display = 'block';
+                    zenithAngleDiv.style.display = 'block';
+                    document.getElementById('radius_curve_2').setAttribute('required', '');
+                    document.getElementById('zenith_angle').setAttribute('required', '');
+                }
+                if (typeHaSelect.value === '3') {
+                    radiusCurve2Div.style.display = 'block';
+                    zenithAngleDiv.style.display = 'block';
+                    radiusCurve4Div.style.display = 'block';
+                    document.getElementById('radius_curve_2').setAttribute('required', '');
+                    document.getElementById('zenith_angle').setAttribute('required', '');
+                    document.getElementById('radius_curve_4').setAttribute('required', '');
+                }
+                if (typeHaSelect.value === '4') {
+                    radiusCurve2Div.style.display = 'block';
+                    zenithAngleDiv.style.display = 'block';
+                    radiusCurve4Div.style.display = 'block';
+                    radiusCurve5Div.style.display = 'block';
+                    angle4Div.style.display = 'block';
+                    document.getElementById('radius_curve_2').setAttribute('required', '');
+                    document.getElementById('zenith_angle').setAttribute('required', '');
+                    document.getElementById('radius_curve_4').setAttribute('required', '');
+                    document.getElementById('radius_curve_5').setAttribute('required', '');
+                    document.getElementById('angle_4').setAttribute('required', '');
+                }
+                if (typeHaSelect.value === '5') {
+                    radiusCurve2Div.style.display = 'block';
+                    zenithAngleDiv.style.display = 'block';
+                    angle3Div.style.display = 'block';
+                    radiusCurve3Div.style.display = 'block';
+                    document.getElementById('radius_curve_2').setAttribute('required', '');
+                    document.getElementById('zenith_angle').setAttribute('required', '');
+                    document.getElementById('angle_3').setAttribute('required', '');
+                    document.getElementById('radius_curve_3').setAttribute('required', '');
+                }
+                // type_h логика работает всегда
+                switch (typeHSelect.value) {
+                    case '0': // Тангенциальный
+                        lengthHorDiv.style.display = 'block';
+                        document.getElementById('length_hor').setAttribute('required', '');
+                        break;
+                    case '-1': // Нисходящий
+                        lengthHorDiv.style.display = 'block';
+                        deviationDownDiv.style.display = 'block';
+                        document.getElementById('length_hor').setAttribute('required', '');
+                        document.getElementById('deviation_down').setAttribute('required', '');
+                        break;
+                    case '1': // Восходящий
+                        lengthHorDiv.style.display = 'block';
+                        deviationUpDiv.style.display = 'block';
+                        document.getElementById('length_hor').setAttribute('required', '');
+                        document.getElementById('deviation_up').setAttribute('required', '');
+                        break;
+                    case '2': // Волнообразный
+                        lengthHorDiv.style.display = 'block';
+                        deviationDownDiv.style.display = 'block';
+                        deviationUpDiv.style.display = 'block';
+                        radiusCurveDiv.style.display = 'block';
+                        document.getElementById('length_hor').setAttribute('required', '');
+                        document.getElementById('deviation_down').setAttribute('required', '');
+                        document.getElementById('deviation_up').setAttribute('required', '');
+                        document.getElementById('radius_curve').setAttribute('required', '');
+                        break;
+                }
+            }
+
+            typeHSelect.addEventListener('change', updateFields);
+            typeHaSelect.addEventListener('change', updateFields);
+
+            // Скрыть все при загрузке
+            hideAll();
+        });
+    </script>
+</body>
+</html> 

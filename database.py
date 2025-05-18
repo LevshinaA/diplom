@@ -1,119 +1,58 @@
 import sqlite3
+import json
 from datetime import datetime
 
 def init_db():
     """Инициализация базы данных"""
-    conn = sqlite3.connect('calculations.db')
+    conn = sqlite3.connect('well_calculations.db')
     c = conn.cursor()
-
-    c.execute("PRAGMA table_info(calculations)")
-    columns = [column[1] for column in c.fetchall()]
     
-    if not columns:
-
-        c.execute('''
-            CREATE TABLE calculations (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                depth REAL,
-                profile_type INTEGER, -- 1 - трехинтервальный, 2 - четырехинтервальный
-                timestamp DATETIME,
-                results TEXT
-            )
-        ''')
-    elif 'displacement' in columns:
-        c.execute('DROP TABLE IF EXISTS calculations_new')
-
-        c.execute('''
-            CREATE TABLE calculations_new (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                depth REAL,
-                profile_type INTEGER, -- 1 - трехинтервальный, 2 - четырехинтервальный
-                timestamp DATETIME,
-                results TEXT
-            )
-        ''')
-
-        c.execute('''
-            INSERT INTO calculations_new (id, depth, profile_type, timestamp, results)
-            SELECT 
-                id,
-                depth,
-                1, -- устанавливаем тип 1 для существующих расчетов
-                timestamp,
-                results
-            FROM calculations
-        ''')
-
-        c.execute('DROP TABLE calculations')
-        c.execute('ALTER TABLE calculations_new RENAME TO calculations')
+    # Создаем единую таблицу для всех типов скважин
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS calculations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            depth REAL NOT NULL,
+            type INTEGER NOT NULL,  -- 1: наклонная, 2: горизонтальная
+            profile_type INTEGER NOT NULL,  -- для наклонных: 1-3инт, 2-4инт, 3-J, 4-S; для горизонтальных: 0
+            type_ha INTEGER NOT NULL,  -- для наклонных: 0; для горизонтальных: 1-5
+            type_h INTEGER NOT NULL,  -- для наклонных: 0; для горизонтальных: 1-4
+            timestamp DATETIME NOT NULL,
+            results TEXT NOT NULL
+        )
+    ''')
     
     conn.commit()
     conn.close()
 
-def save_calculation_results(depth, profile_type, results):
+def save_calculation_results(depth, well_type, profile_type, type_ha, type_h, results):
     """
     Сохранение результатов расчета в базу данных
     
     Args:
         depth: глубина скважины
-        profile_type: тип профиля (1 - трехинтервальный, 2 - четырехинтервальный)
+        well_type: тип скважины (1 - наклонная, 2 - горизонтальная)
+        profile_type: тип профиля (для наклонных: 1-3инт, 2-4инт, 3-J, 4-S; для горизонтальных: 0)
+        type_ha: тип горизонтального аппарата (для наклонных: 0; для горизонтальных: 1-5)
+        type_h: тип горизонтального аппарата (для наклонных: 0; для горизонтальных: 1-4)
         results: результаты расчета
     
     Returns:
         int: ID сохраненного расчета
     """
-    print(f"Сохранение расчета: depth={depth}, profile_type={profile_type}")
+    print(f"Сохранение расчета: depth={depth}, well_type={well_type}, profile_type={profile_type}")
     
-    conn = sqlite3.connect('calculations.db')
-    c = conn.cursor()
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    
-    try:
-        c.execute('INSERT INTO calculations (depth, profile_type, timestamp, results) VALUES (?, ?, ?, ?)',
-                 (depth, profile_type, timestamp, str(results)))
-        calculation_id = c.lastrowid
-        conn.commit()
-        print(f"Расчет успешно сохранен с ID: {calculation_id}")
-        return calculation_id
-    except Exception as e:
-        print(f"Ошибка при сохранении расчета: {str(e)}")
-        conn.rollback()
-        raise
-    finally:
-        conn.close()
-
-def get_all_calculations():
-    """
-    Получение списка всех расчетов
-    
-    Returns:
-        list: список словарей с информацией о расчетах
-    """
-    print("Получение списка всех расчетов")
-    
-    conn = sqlite3.connect('calculations.db')
+    conn = sqlite3.connect('well_calculations.db')
     c = conn.cursor()
     
-    try:
-        c.execute('SELECT id, depth, profile_type, timestamp FROM calculations ORDER BY timestamp DESC')
-        calculations = []
-        for row in c.fetchall():
-            profile_type_str = "Трехинтервальный" if row[2] == 1 else "Четырехинтервальный"
-            calculations.append({
-                'id': row[0],
-                'depth': row[1],
-                'profile_type': row[2],
-                'profile_type_str': profile_type_str,
-                'timestamp': row[3]
-            })
-        print(f"Найдено {len(calculations)} расчетов")
-        return calculations
-        
-    except Exception as e:
-        print(f"Ошибка при получении расчетов: {str(e)}")
-        raise
-    finally:
-        conn.close()
+    c.execute('''
+    INSERT INTO calculations (depth, type, profile_type, type_ha, type_h, timestamp, results)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+    ''', (depth, well_type, profile_type, type_ha, type_h, datetime.now(), json.dumps(results)))
+    
+    calculation_id = c.lastrowid
+    conn.commit()
+    conn.close()
+    return calculation_id
 
 def get_calculation_results(calculation_id):
     """
@@ -125,26 +64,52 @@ def get_calculation_results(calculation_id):
     Returns:
         dict: словарь с данными таблицы
     """
-    conn = sqlite3.connect('calculations.db')
+    conn = sqlite3.connect('well_calculations.db')
     c = conn.cursor()
     
-    try:
-        c.execute('SELECT depth, profile_type, timestamp, results FROM calculations WHERE id = ?', (calculation_id,))
-        row = c.fetchone()
-        
-        if row:
-            profile_type_str = "Трехинтервальный" if row[1] == 1 else "Четырехинтервальный"
-            return {
-                'depth': row[0],
-                'profile_type': row[1],
-                'profile_type_str': profile_type_str,
-                'timestamp': row[2],
-                'results': eval(row[3])
-            }
-        return None
-        
-    finally:
-        conn.close()
+    c.execute('SELECT * FROM calculations WHERE id = ?', (calculation_id,))
+    row = c.fetchone()
+    conn.close()
+    
+    if row:
+        return {
+            'id': row[0],
+            'depth': row[1],
+            'type': row[2],
+            'profile_type': row[3],
+            'type_ha': row[4],
+            'type_h': row[5],
+            'timestamp': row[6],
+            'results': json.loads(row[7])
+        }
+    return None
+
+def get_all_calculations():
+    """
+    Получение списка всех расчетов
+    
+    Returns:
+        list: список словарей с информацией о расчетах
+    """
+    print("Получение списка всех расчетов")
+    
+    conn = sqlite3.connect('well_calculations.db')
+    c = conn.cursor()
+    
+    c.execute('SELECT * FROM calculations ORDER BY timestamp DESC')
+    rows = c.fetchall()
+    conn.close()
+    
+    return [{
+        'id': row[0],
+        'depth': row[1],
+        'type': row[2],
+        'profile_type': row[3],
+        'type_ha': row[4],
+        'type_h': row[5],
+        'timestamp': row[6],
+        'results': json.loads(row[7])
+    } for row in rows]
 
 def delete_calculation(calculation_id):
     """
@@ -153,11 +118,26 @@ def delete_calculation(calculation_id):
     Args:
         calculation_id: ID расчета для удаления
     """
-    conn = sqlite3.connect('calculations.db')
+    conn = sqlite3.connect('well_calculations.db')
+    c = conn.cursor()
+    
+    c.execute('DELETE FROM calculations WHERE id = ?', (calculation_id,))
+    conn.commit()
+    conn.close()
+
+def clear_database():
+    """
+    Очистка всей базы данных - удаление всех записей из таблицы calculations
+    """
+    conn = sqlite3.connect('well_calculations.db')
     c = conn.cursor()
     
     try:
-        c.execute('DELETE FROM calculations WHERE id = ?', (calculation_id,))
+        c.execute('DELETE FROM calculations')
         conn.commit()
+        print("База данных успешно очищена")
+    except Exception as e:
+        print(f"Ошибка при очистке базы данных: {str(e)}")
+        conn.rollback()
     finally:
         conn.close() 

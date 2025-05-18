@@ -4,394 +4,347 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Расчет профиля скважины</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* Общие стили */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        :root {
+            --primary-color: #2196F3;
+            --secondary-color: #1976D2;
+            --background-color: #f5f7fa;
+            --card-background: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border-color: #e0e0e0;
+            --success-color: #4CAF50;
+            --error-color: #f44336;
         }
 
-        /* Навигация */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
         .nav {
+            background-color: var(--card-background);
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: var(--primary-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav a:hover {
+            background-color: rgba(33, 150, 243, 0.1);
+        }
+
+        .main-content {
+            background: var(--card-background);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
             margin-bottom: 20px;
         }
-        .nav a {
-            display: inline-block;
-            padding: 8px 15px;
-            text-decoration: none;
-            color: #333;
-            background-color: #f0f0f0;
-            border-radius: 4px;
-            margin-right: 10px;
-        }
-        .nav a:hover {
-            background-color: #e0e0e0;
-        }
 
-        /* Группы радио-кнопок */
-        .radio-group {
-            margin-bottom: 25px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 6px;
-        }
-        .radio-group p {
-            margin: 0 0 10px 0;
-            font-weight: bold;
-            color: #333;
-        }
-        .radio-group label {
-            display: inline-block;
-            margin-right: 20px;
-            margin-bottom: 10px;
-            cursor: pointer;
-        }
-        .radio-group input[type="radio"] {
-            margin-right: 5px;
-        }
-
-        /* Поля ввода */
-        .form-group {
-            margin-bottom: 15px;
-        }
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #333;
-        }
-        .form-group input[type="number"] {
-            width: 200px;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        .form-group input[type="number"]:focus {
-            border-color: #4CAF50;
-            outline: none;
-            box-shadow: 0 0 3px rgba(76, 175, 80, 0.3);
-        }
-        .units {
-            margin-left: 5px;
-            color: #666;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 500;
         }
 
-        /* Дополнительные поля */
-        .profile-type-fields {
-            display: none;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 6px;
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+            outline: none;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
             margin-bottom: 20px;
         }
 
-        /* Кнопка расчета */
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #45a049;
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        /* Информационный блок */
-        .info-block {
-            margin: 20px 0;
+        .radio-option input[type="radio"] {
+            width: auto;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            color: var(--error-color);
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+
+        .profile-type-section {
+            background: rgba(33, 150, 243, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .profile-type-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .profile-type-option {
             padding: 15px;
-            background-color: #e8f5e9;
-            border-radius: 4px;
-            border-left: 4px solid #4CAF50;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .profile-type-option:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(33, 150, 243, 0.1);
+        }
+
+        .profile-type-option.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(33, 150, 243, 0.1);
+        }
+
+        .profile-type-option h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .profile-type-option p {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .radio-group {
+                flex-direction: column;
+            }
+
+            .profile-type-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Навигация -->
         <div class="nav">
-            <a href="/">Главная</a>
-            <a href="/history">История расчетов</a>
+            <a href="/">На главную</a>
         </div>
         
-        <h1>Расчет профиля скважины</h1>
-
-        <form action="/calculate" method="post" id="calculationForm">
-            <input type="hidden" id="profile_type" name="profile_type" value="three">
-
-            <!-- Выбор типа профиля -->
-            <div class="radio-group">
-                <p>Выберите тип профиля:</p>
-                <label>
-                    <input type="radio" name="profile_type_radio" value="three" checked> 
-                    Трехинтервальный профиль
-                </label>
-                <label>
-                    <input type="radio" name="profile_type_radio" value="four"> 
-                    Четырехинтервальный профиль
-                </label>
-                <label>
-                    <input type="radio" name="profile_type_radio" value="j-shaped"> 
-                    J-образный профиль
-                </label>
-                <label>
-                    <input type="radio" name="profile_type_radio" value="s-shaped"> 
-                    S-образный профиль
-                </label>
+        <div class="main-content">
+            <form id="calculationForm" action="/calculate" method="post">
+                <div class="form-section">
+                    <h2>Выберите тип профиля</h2>
+                    <div class="profile-type-section">
+                        <div class="profile-type-grid">
+                            <div class="profile-type-option" onclick="selectProfileType(1)">
+                                <h3>Трехинтервальный</h3>
+                                <p>Профиль с вертикальным участком, участком набора угла и тангенциальным участком</p>
+                            </div>
+                            <div class="profile-type-option" onclick="selectProfileType(2)">
+                                <h3>Четырехинтервальный</h3>
+                                <p>Профиль с двумя участками набора угла и тангенциальным участком</p>
+                            </div>
+                            <div class="profile-type-option" onclick="selectProfileType(4)">
+                                <h3>J-образный</h3>
+                                <p>Профиль с одним участком набора угла и одним участком снижения угла</p>
+                            </div>
+                            <div class="profile-type-option" onclick="selectProfileType(3)">
+                                <h3>S-образный</h3>
+                                <p>Профиль с двумя участками набора угла и двумя участками снижения угла</p>
+                            </div>
+                        </div>
+                        <input type="hidden" name="profile_type" id="profile_type" value="1">
+            </div>
             </div>
 
-            <!-- Выбор типа расчета -->
-            <div class="radio-group">
-                <p>Выберите тип расчета:</p>
-                <label>
-                    <input type="radio" name="calculation_type" value="angle_stabilization" checked> 
-                    Стабилизация угла
-                </label>
-                <label>
-                    <input type="radio" name="calculation_type" value="curvature_preservation">
-                    Сохранение кривизны
-                </label>
-            </div>
-
-            <!-- Основные параметры -->
+                <div class="form-section">
+                    <h2>Основные параметры</h2>
+                    <div class="form-grid">
             <div class="form-group">
-                <label for="H">H - Глубина скважины:</label>
-                <input type="number" id="H" name="H" step="0.1" min="0" required>
-                <span class="units">м</span>
+                            <label for="H">Глубина скважины (H), м</label>
+                            <input type="number" id="H" name="H" step="0.01" required>
             </div>
-
             <div class="form-group">
-                <label for="A">A - Смещение от вертикали:</label>
-                <input type="number" id="A" name="A" step="0.1" min="0" required>
-                <span class="units">м</span>
+                            <label for="A">Смещение (A), м</label>
+                            <input type="number" id="A" name="A" step="0.01" required>
             </div>
-
             <div class="form-group">
-                <label for="Hv">Hв - Длина вертикального участка:</label>
-                <input type="number" id="Hv" name="Hv" step="0.1" min="0" required>
-                <span class="units">м</span>
+                            <label for="Hv">Глубина вертикального участка (Hv), м</label>
+                            <input type="number" id="Hv" name="Hv" step="0.01" required>
             </div>
-
             <div class="form-group">
-                <label for="R1">R1 - Радиус кривизны первого участка:</label>
-                <input type="number" id="R1" name="R1" step="0.1" min="0" required>
-                <span class="units">м</span>
+                            <label for="R1">Радиус искривления первого участка (R1), м</label>
+                            <input type="number" id="R1" name="R1" step="0.01" required>
             </div>
-
-            <div class="form-group">
-                <label for="H_end">Конечная глубина:</label>
-                <input type="number" id="H_end" name="H_end" step="0.1" min="0">
-                <span class="units">м</span>
             </div>
-
-            <!-- Дополнительные поля для четырехинтервального профиля -->
-            <div class="profile-type-fields" id="fourIntervalFields">
-                <div class="form-group">
-                    <label for="initial_angle">α0 - Начальный зенитный угол:</label>
-                    <input type="number" id="initial_angle" name="initial_angle" step="0.1">
-                    <span class="units">град.</span>
                 </div>
 
+                <div class="form-section" id="additionalParams">
+                    <h2>Дополнительные параметры</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="initial_angle">Начальный угол (α), град.</label>
+                            <input type="number" id="initial_angle" name="initial_angle" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label for="R2">Радиус искривления второго участка (R2), м</label>
+                            <input type="number" id="R2" name="R2" step="0.01">
+                        </div>
                 <div class="form-group">
-                    <label for="R2">R2 - Радиус кривизны второго участка:</label>
-                    <input type="number" id="R2" name="R2" step="0.1">
-                    <span class="units">м</span>
+                            <label for="R4">Радиус искривления четвертого участка (R4), м</label>
+                            <input type="number" id="R4" name="R4" step="0.01">
                 </div>
             </div>
-
-            <!-- Дополнительные поля для J/S-образного профиля -->
-            <div class="profile-type-fields" id="jsShapedFields">
-                <div class="form-group">
-                    <label for="initial_angle_js">α0 - Начальный зенитный угол:</label>
-                    <input type="number" id="initial_angle_js" name="initial_angle" step="0.1" required min="0">
-                    <span class="units">град.</span>
                 </div>
 
+                <div class="form-section">
+                    <h2>Дополнительные настройки</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="calculation_type">Тип расчета</label>
+                            <select id="calculation_type" name="calculation_type">
+                                <option value="angle_stabilization">Стабилизация угла</option>
+                                <option value="curvature_preservation">Сохранение искривления</option>
+                            </select>
+                        </div>
                 <div class="form-group">
-                    <label for="R2_js">R2 - Радиус кривизны второго участка:</label>
-                    <input type="number" id="R2_js" name="R2" step="0.1" required min="0">
-                    <span class="units">м</span>
+                            <label for="H_end">Конечная глубина (H_end), м</label>
+                            <input type="number" id="H_end" name="H_end" step="0.01">
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="R4">R4 - Радиус кривизны четвертого участка:</label>
-                    <input type="number" id="R4" name="R4" step="0.1" required min="0">
-                    <span class="units">м</span>
+                <div class="form-section">
+                    <button type="submit" class="btn btn-primary">Рассчитать</button>
                 </div>
+            </form>
             </div>
-
-            <button type="submit">Рассчитать</button>
-        </form>
     </div>
 
     <script>
-        // Добавьте эту функцию в начало скрипта
-        function initializeFields() {
-            const profileType = document.querySelector('input[name="profile_type_radio"]:checked').value;
-            const fourIntervalFields = document.getElementById('fourIntervalFields');
-            const jsShapedFields = document.getElementById('jsShapedFields');
+        function selectProfileType(type) {
+            document.getElementById('profile_type').value = type;
             
-            // Скрываем все дополнительные поля
-            document.querySelectorAll('.profile-type-fields').forEach(field => {
-                field.style.display = 'none';
-            });
-            
-            // Сбрасываем обязательные поля
-            document.querySelectorAll('.profile-type-fields input').forEach(input => {
-                input.required = false;
+            // Удаляем класс selected у всех опций
+            document.querySelectorAll('.profile-type-option').forEach(option => {
+                option.classList.remove('selected');
             });
 
-            // Показываем нужные поля в зависимости от выбранного типа
-            if (profileType === 'four') {
-                fourIntervalFields.style.display = 'block';
-                document.getElementById('initial_angle').required = true;
-                document.getElementById('R2').required = true;
-            } else if (profileType === 'j-shaped' || profileType === 's-shaped') {
-                jsShapedFields.style.display = 'block';
-                document.getElementById('initial_angle_js').required = true;
-                document.getElementById('R2_js').required = true;
-                document.getElementById('R4').required = true;
-            }
-        }
-
-        // Вызовите функцию при загрузке страницы
-        document.addEventListener('DOMContentLoaded', initializeFields);
-
-        // Функция валидации полей
-        function validateFields() {
-            const H = parseFloat(document.getElementById('H').value);
-            const H_end = parseFloat(document.getElementById('H_end').value);
-            const Hv = parseFloat(document.getElementById('Hv').value);
-
-            if (H_end && H_end <= H) {
-                alert('Конечная глубина должна быть больше глубины скважины');
-                return false;
-            }
-
-            if (Hv >= H) {
-                alert('Длина вертикального участка должна быть меньше глубины скважины');
-                return false;
-            }
-
-            return true;
-        }
-
-        // Обработка изменения типа профиля
-        document.querySelectorAll('input[name="profile_type_radio"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                const fourIntervalFields = document.getElementById('fourIntervalFields');
-                const jsShapedFields = document.getElementById('jsShapedFields');
-                const hiddenProfileType = document.getElementById('profile_type');
-                
-                // Скрываем все дополнительные поля
-                document.querySelectorAll('.profile-type-fields').forEach(field => {
-                    field.style.display = 'none';
-                });
-                
-                // Сбрасываем обязательные поля
-                document.querySelectorAll('.profile-type-fields input').forEach(input => {
-                    input.required = false;
-                });
-
-                // Устанавливаем тип профиля и показываем нужные поля
-                let profileTypeValue;
-                if (this.value === 'three') {
-                    profileTypeValue = 1;
-                } else if (this.value === 'four') {
-                    profileTypeValue = 2;
-                    fourIntervalFields.style.display = 'block';
-                    document.getElementById('initial_angle').required = true;
-                    document.getElementById('R2').required = true;
-                } else if (this.value === 'j-shaped') {
-                    profileTypeValue = 3;
-                    jsShapedFields.style.display = 'block';
-                    document.getElementById('initial_angle_js').required = true;
-                    document.getElementById('R2_js').required = true;
-                    document.getElementById('R4').required = true;
-                } else if (this.value === 's-shaped') {
-                    profileTypeValue = 4;
-                    jsShapedFields.style.display = 'block';
-                    document.getElementById('initial_angle_js').required = true;
-                    document.getElementById('R2_js').required = true;
-                    document.getElementById('R4').required = true;
+            // Добавляем класс selected выбранной опции
+            event.currentTarget.classList.add('selected');
+            
+            // Показываем/скрываем дополнительные параметры в зависимости от типа профиля
+            const additionalParams = document.getElementById('additionalParams');
+            const initialAngle = document.getElementById('initial_angle');
+            const R2 = document.getElementById('R2');
+            const R4 = document.getElementById('R4');
+            
+            if (type === 1) { // Трехинтервальный
+                additionalParams.style.display = 'none';
+                initialAngle.required = false;
+                R2.required = false;
+                R4.required = false;
+            } else if (type === 2) { // Четырехинтервальный
+                additionalParams.style.display = 'block';
+                initialAngle.required = true;
+                R2.required = true;
+                R4.required = false;
+            } else if (type === 3 || type === 4) { // J-образный или S-образный
+                additionalParams.style.display = 'block';
+                initialAngle.required = true;
+                R2.required = true;
+                R4.required = true;
                 }
-                
-                hiddenProfileType.value = profileTypeValue;
-            });
-        });
+        }
 
         // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
-            const defaultRadio = document.querySelector('input[name="profile_type_radio"]:checked');
-            if (defaultRadio) {
-                defaultRadio.dispatchEvent(new Event('change'));
-            }
-        });
-
-        // Валидация формы перед отправкой
-        document.getElementById('calculationForm').addEventListener('submit', function(e) {
-            if (!validateFields()) {
-                e.preventDefault();
-            }
-        });
-
-        // Валидация при изменении значений
-        document.getElementById('H_end').addEventListener('input', function() {
-            const H = parseFloat(document.getElementById('H').value);
-            const H_end = parseFloat(this.value);
-            
-            if (H_end && H_end <= H) {
-                this.setCustomValidity('Конечная глубина должна быть больше глубины скважины');
-            } else {
-                this.setCustomValidity('');
-            }
-        });
-
-        document.getElementById('H').addEventListener('input', function() {
-            const H_end = document.getElementById('H_end');
-            if (H_end.value) {
-                H_end.dispatchEvent(new Event('input'));
-            }
-        });
-
-        document.getElementById('calculationForm').addEventListener('submit', function(e) {
-            const inputs = this.querySelectorAll('input[type="number"]');
-            for (let input of inputs) {
-                // Пропускаем необязательные поля, если они пустые
-                if (!input.required && input.value === '') {
-                    continue;
-                }
-                
-                const value = parseFloat(input.value);
-                if (isNaN(value)) {
-                    e.preventDefault();
-                    alert(`Поле "${input.previousElementSibling.textContent}" должно содержать числовое значение`);
-                    input.focus();
-                    return;
-                }
-                
-                if (value < 0) {
-                    e.preventDefault();
-                    alert(`Поле "${input.previousElementSibling.textContent}" не может быть отрицательным`);
-                    input.focus();
-                    return;
-                }
-            }
+            selectProfileType(1); // По умолчанию выбираем трехинтервальный профиль
         });
     </script>
 </body>

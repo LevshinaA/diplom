@@ -25,16 +25,18 @@ def create_vertical_section(Hv):
         'curvature_rate': 0
     }
 
-def create_angle_build_section(section_num, prev_depth, prev_length, R, angle, displacement):
+def create_angle_build_section(section_num, prev_depth, prev_length, R, angle, displacement, angle2, H, param=None):
     """Создает данные для участка набора угла"""
     interval_length = (pi * R * angle) / 180
+    if param == '-':
+        R = -R
     return {
         'section': section_num,
-        'vertical_depth': round(prev_depth + R * sin(radians(angle)), 2),
+        'vertical_depth': round(H, 2),
         'wellbore_length': round(prev_length + interval_length, 2),
         'interval_length': round(interval_length, 2),
         'displacement': round(displacement, 2),
-        'zenith_angle': round(angle, 2),
+        'zenith_angle': round(angle2, 2),
         'curvature_rate': round(573 / R, 2)
     }
 
@@ -76,35 +78,38 @@ def calculate_profile(H, A, Hv, R1, calculation_type='angle_stabilization', H_en
     try:
 
         H0 = H - Hv
-        discriminant = H0**2 - 4*(2*R1 - A)
+        discriminant = H0**2 - A*(2*R1 - A)
         if discriminant < 0:
             raise ValueError("Невозможно выполнить расчет: подкоренное выражение отрицательное")
-        
-        alpha1 = 2 * atan((H0 - sqrt(discriminant))/(2*R1 - A))
-        alpha1_degrees = degrees(alpha1)
-        L = (A - R1*(1 - cos(alpha1)))/sin(alpha1)
+        div_nul = 2*R1 - A
+        if div_nul == 0:
+            raise ValueError("Невозможно выполнить расчет: делитель равен нулю")
+        alpha1 = 2 * degrees(atan((H0 - sqrt(discriminant))/div_nul))
+        L = (A - R1*(1 - cos(radians(alpha1))))/sin(radians(alpha1))
 
         table_data = {
             'headers': create_table_headers(),
             'rows': [
                 create_vertical_section(Hv),
-                create_angle_build_section(2, Hv, Hv, R1, alpha1_degrees, 
-                                        R1 * (1 - cos(alpha1))),
+                create_angle_build_section(2, Hv, Hv, R1, alpha1, 
+                                        R1 * (1 - cos(radians(alpha1))), alpha1, H),
                 create_tangent_section(3, Hv + R1 * sin(alpha1), 
-                                     Hv + (pi * R1 * alpha1_degrees) / 180,
-                                     L, alpha1_degrees, A)
+                                     Hv + (pi * R1 * alpha1) / 180,
+                                     L, alpha1, A)
             ]
         }
+        table_data['rows'][1]['vertical_depth'] =  round(Hv + R1 * sin(radians(alpha1)), 2)
+        table_data['rows'][2]['vertical_depth'] =  round(H, 2)
 
         if H_end and H_end > H:
             table_data['rows'].append(
                 create_extra_section(4, H_end, H, 
                                    table_data['rows'][-1]['wellbore_length'],
-                                   A, calculation_type, alpha1_degrees)
+                                   A, calculation_type, alpha1)
             )
 
         return {
-            'alpha1_degrees': round(alpha1_degrees, 2),
+            'alpha1': round(alpha1, 2),
             'alpha1_radians': round(alpha1, 4),
             'L': round(L, 2),
             'H0': round(H0, 2),
@@ -133,29 +138,37 @@ def calculate_four_interval_profile(H, A, Hv, R1, initial_angle, R2, calculation
         A_1 = abs(A - B)
         C = Q_1 / cos(radians(initial_angle)) + A_1 * sin(radians(initial_angle))
         T = A_1 * cos(radians(initial_angle))
-        KOR = sqrt((C ** 2) + (T ** 2) - 2 * T * R2)
+        KOR_expr = (C ** 2) + (T ** 2) - 2 * T * R2
+        if KOR_expr < 0:
+            raise ValueError(f'Подкоренное выражение отрицательно: {KOR_expr}')
+        KOR = sqrt(KOR_expr)
         T_0 = (R2 * (R2 - T) + C * KOR) / ((R2 - T) ** 2 + C ** 2)
         ang_2 = 90 - degrees(atan(T_0 / sqrt(1 - T_0 ** 2))) + initial_angle
-
+        H_ost = H_0 - R1 * sin(radians(initial_angle)) - R2 * (sin(radians(ang_2)) - sin(radians(initial_angle)))
+        A_ost = A - R1 * (1 - cos(radians(initial_angle))) - R2 * (cos(radians(initial_angle)) - cos(radians(ang_2)))
+        L_n = sqrt(H_ost ** 2 + A_ost ** 2)
 
         table_data = {
             'headers': create_table_headers(),
             'rows': [
                 create_vertical_section(Hv),
                 create_angle_build_section(2, Hv, Hv, R1, initial_angle,
-                                        R1 * (1 - cos(radians(initial_angle)))),
+                                        R1 * (1 - cos(radians(initial_angle))), initial_angle, Hv + R1 * sin(radians(initial_angle))),
                 create_angle_build_section(3, 
                     Hv + R1 * sin(radians(initial_angle)),
                     Hv + (pi * R1 * initial_angle) / 180,
                     R2, ang_2 - initial_angle,
                     R1 * (1 - cos(radians(initial_angle))) + 
-                    R2 * (cos(radians(initial_angle)) - cos(radians(ang_2)))),
+                    R2 * (cos(radians(initial_angle)) - cos(radians(ang_2))), ang_2, H),
                 create_tangent_section(4,
-                    H - H_0,
+                    Hv,
                     Hv + (pi * R1 * initial_angle) / 180 + (pi * R2 * (ang_2 - initial_angle)) / 180,
-                    sqrt(H_0**2 + A**2), ang_2, A)
+                    L_n, ang_2, A)
             ]
         }
+
+        table_data['rows'][2]['vertical_depth'] =  round(Hv + R1 * sin(radians(initial_angle))  + R2 * (sin(radians(ang_2)) - sin(radians(initial_angle))), 2)
+        table_data['rows'][3]['vertical_depth'] =  round(H, 2)
 
         if H_end and H_end > H:
             table_data['rows'].append(
@@ -192,7 +205,7 @@ def calculate_four_interval_profile(H, A, Hv, R1, initial_angle, R2, calculation
             }
         }
 
-def calculate_j_shaped_profile(H, A, Hv, R1, initial_angle, R2, R4, calculation_type='angle_stabilization', H_end=None):
+def calculate_j_shaped_profile(H, A, Hv, R1, initial_angle, R4, calculation_type='angle_stabilization', H_end=None):
     """Расчет параметров J-образного профиля скважины"""
     try:
 
@@ -207,7 +220,7 @@ def calculate_j_shaped_profile(H, A, Hv, R1, initial_angle, R2, R4, calculation_
             'rows': [
                 create_vertical_section(Hv),
                 create_angle_build_section(2, Hv, Hv, R1, initial_angle,
-                                        R1 * (1 - cos(radians(initial_angle)))),
+                                        R1 * (1 - cos(radians(initial_angle))), initial_angle, Hv + R1 * sin(radians(initial_angle))),
                 create_tangent_section(3,
                     Hv + R1 * sin(radians(initial_angle)),
                     Hv + (pi * R1 * initial_angle) / 180,
@@ -216,7 +229,7 @@ def calculate_j_shaped_profile(H, A, Hv, R1, initial_angle, R2, R4, calculation_
                 create_angle_build_section(4,
                     H,
                     Hv + (pi * R1 * initial_angle) / 180 + L,
-                    R4, ang_p - initial_angle, A)
+                    R4, ang_p - initial_angle, A, ang_p, H),
             ]
         }
 
@@ -237,7 +250,7 @@ def calculate_j_shaped_profile(H, A, Hv, R1, initial_angle, R2, R4, calculation_
             'table_data': table_data,
             'input_data': {
                 'H': H, 'A': A, 'Hv': Hv, 'R1': R1,
-                'initial_angle': initial_angle, 'R2': R2, 'R4': R4,
+                'initial_angle': initial_angle, 'R1': R1, 'R4': R4,
                 'calculation_type': calculation_type, 'H_end': H_end
             }
         }
@@ -246,44 +259,35 @@ def calculate_j_shaped_profile(H, A, Hv, R1, initial_angle, R2, R4, calculation_
             'error': str(e),
             'input_data': {
                 'H': H, 'A': A, 'Hv': Hv, 'R1': R1,
-                'initial_angle': initial_angle, 'R2': R2, 'R4': R4,
+                'initial_angle': initial_angle, 'R1': R1, 'R4': R4,
                 'calculation_type': calculation_type, 'H_end': H_end
             }
         }
 
-def calculate_s_shaped_profile(H, A, Hv, R1, initial_angle, R2, R4, calculation_type='angle_stabilization', H_end=None):
+def calculate_s_shaped_profile(H, A, Hv, R1, initial_angle, R4, calculation_type='angle_stabilization', H_end=None):
     """Расчет параметров S-образного профиля скважины"""
     try:
-        # Основные расчеты
         B = R1 * (1 - cos(radians(initial_angle))) + (H - Hv - R1 * sin(radians(initial_angle))) * tan(radians(initial_angle))
         Q = sqrt(2 * R4 * abs(A - B) * cos(radians(initial_angle)) - (A - B) ** 2 * (cos(radians(initial_angle)) ** 2))
         C = ((H - Hv - R1 * sin(radians(initial_angle))) / cos(radians(initial_angle))) + abs(A - B) * sin(radians(initial_angle))
         L = C - Q
         ang_p = initial_angle - degrees(atan(Q / sqrt(R4 ** 2 - Q ** 2)))
 
-        # Формируем таблицу результатов
         table_data = {
             'headers': create_table_headers(),
             'rows': [
                 create_vertical_section(Hv),
                 create_angle_build_section(2, Hv, Hv, R1, initial_angle,
-                                        R1 * (1 - cos(radians(initial_angle)))),
+                                        R1 * (1 - cos(radians(initial_angle))), initial_angle, Hv + R1 * sin(radians(initial_angle))),
                 create_tangent_section(3,
                     Hv + R1 * sin(radians(initial_angle)),
                     Hv + (pi * R1 * initial_angle) / 180,
                     L, initial_angle,
                     R1 * (1 - cos(radians(initial_angle))) + L * sin(radians(initial_angle))),
-                # Для S-образного профиля используем отрицательную интенсивность искривления
-                {
-                    'section': 4,
-                    'vertical_depth': round(H, 2),
-                    'wellbore_length': round(Hv + (pi * R1 * initial_angle) / 180 + L + 
-                                           (pi * R4 * (initial_angle - ang_p)) / 180, 2),
-                    'interval_length': round((pi * R4 * (initial_angle - ang_p)) / 180, 2),
-                    'displacement': round(A, 2),
-                    'zenith_angle': round(ang_p, 2),
-                    'curvature_rate': round(-573 / R4, 2)
-                }
+                create_angle_build_section(4,
+                    H,
+                    Hv + (pi * R1 * initial_angle) / 180 + L,
+                    R4, -ang_p + initial_angle, A, ang_p, H, '-'),
             ]
         }
 
@@ -304,7 +308,7 @@ def calculate_s_shaped_profile(H, A, Hv, R1, initial_angle, R2, R4, calculation_
             'table_data': table_data,
             'input_data': {
                 'H': H, 'A': A, 'Hv': Hv, 'R1': R1,
-                'initial_angle': initial_angle, 'R2': R2, 'R4': R4,
+                'initial_angle': initial_angle, 'R4': R4,
                 'calculation_type': calculation_type, 'H_end': H_end
             }
         }
@@ -313,7 +317,7 @@ def calculate_s_shaped_profile(H, A, Hv, R1, initial_angle, R2, R4, calculation_
             'error': str(e),
             'input_data': {
                 'H': H, 'A': A, 'Hv': Hv, 'R1': R1,
-                'initial_angle': initial_angle, 'R2': R2, 'R4': R4,
+                'initial_angle': initial_angle, 'R4': R4,
                 'calculation_type': calculation_type, 'H_end': H_end
             }
         }

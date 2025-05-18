@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расчет наклонно-направленной скважины</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --secondary-color: #1976D2;
+            --background-color: #f5f7fa;
+            --card-background: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border-color: #e0e0e0;
+            --error-color: #f44336;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .nav {
+            background-color: var(--card-background);
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: var(--primary-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav a:hover {
+            background-color: rgba(33, 150, 243, 0.1);
+        }
+
+        .main-content {
+            background: var(--card-background);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+            outline: none;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            color: var(--error-color);
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+
+        .profile-type-selector {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(33, 150, 243, 0.05);
+            border-radius: 8px;
+        }
+
+        .profile-type-selector .form-group {
+            margin-bottom: 15px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+             .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav">
+            <a href="/">На главную</a>
+            <a href="/well_type_selection">Выбор типа скважины</a>
+        </div>
+
+        <div class="main-content">
+
+            <form id="calculationForm" action="/calculate" method="post">
+                <div class="profile-type-selector">
+                    <div class="form-group">
+                        <label for="profile-type">Выберите вид профиля скважины:</label>
+                        <select id="profile-type" name="profile_type" onchange="changeFields()">
+                            <option value="1">Трехинтервальный</option>
+                            <option value="2">Четырехинтервальный</option>
+                            <option value="3">S-образный</option>
+                            <option value="4">J-образный</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>Основные параметры</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="H">Проектная глубина, м</label>
+                            <input type="number" id="H" name="H" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="A">Смещение на проектной глубине, м</label>
+                            <input type="number" id="A" name="A" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="Hv">Глубина вертикального участка, м</label>
+                            <input type="number" id="Hv" name="Hv" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="R1">Радиус кривизны 2 участка, м</label>
+                            <input type="number" id="R1" name="R1" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section" id="additional-params">
+                    <h2>Дополнительные параметры</h2>
+                    <div class="form-grid">
+                        <div class="form-group" id="initial-angle-group">
+                            <label for="initial_angle">Начальный зенитный угол, град.</label>
+                            <input type="number" id="initial_angle" name="initial_angle">
+                        </div>
+                        <div class="form-group" id="r2-group">
+                            <label for="R2">Радиус кривизны 3 участка, м</label>
+                            <input type="number" id="R2" name="R2">
+                        </div>
+                        <div class="form-group" id="r4-group">
+                            <label for="R4">Радиус кривизны 4 участка, м</label>
+                            <input type="number" id="R4" name="R4">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>Параметры кривизны ствола ниже проектной глубины</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="calculation_type">Тип расчета</label>
+                            <select id="calculation_type" name="calculation_type">
+                                <option value="angle_stabilization">Стабилизация угла</option>
+                                <option value="curvature_preservation">Сохранение искривления</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="H_end">Конечная глубина, м</label>
+                            <input type="number" id="H_end" name="H_end">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <button type="submit" class="btn btn-primary">Рассчитать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function changeFields() {
+            const profileType = document.getElementById('profile-type').value;
+            const initialAngleGroup = document.getElementById('initial-angle-group');
+            const r2Group = document.getElementById('r2-group');
+            const r4Group = document.getElementById('r4-group');
+            const additionalParams = document.getElementById('additional-params');
+
+            // Скрываем все дополнительные поля
+            initialAngleGroup.classList.add('hidden');
+            r2Group.classList.add('hidden');
+            r4Group.classList.add('hidden');
+            additionalParams.classList.add('hidden');
+
+            // Сбрасываем required атрибуты и значения полей
+            const initialAngleInput = document.getElementById('initial_angle');
+            const r2Input = document.getElementById('R2');
+            const r4Input = document.getElementById('R4');
+
+            initialAngleInput.removeAttribute('required');
+            r2Input.removeAttribute('required');
+            r4Input.removeAttribute('required');
+
+            initialAngleInput.value = '';
+            r2Input.value = '';
+            r4Input.value = '';
+
+            // Показываем нужные поля в зависимости от типа профиля
+            if (profileType === '1') { // Трехинтервальный
+                // Ничего не показываем для трехинтервального профиля
+            } else if (profileType === '2') { // Четырехинтервальный
+                additionalParams.classList.remove('hidden');
+                initialAngleGroup.classList.remove('hidden');
+                r2Group.classList.remove('hidden');
+                initialAngleInput.setAttribute('required', '');
+                r2Input.setAttribute('required', '');
+            } else if (profileType === '3' || profileType === '4') { // S-образный или J-образный
+                additionalParams.classList.remove('hidden');
+                initialAngleGroup.classList.remove('hidden');
+                r4Group.classList.remove('hidden');
+                initialAngleInput.setAttribute('required', '');
+                r4Input.setAttribute('required', '');
+            }
+
+            // Логика для поля "Тип расчета"
+            const calculationTypeSelect = document.getElementById('calculation_type');
+
+            if (profileType === '3' || profileType === '4') {
+                // Для S-образного и J-образного профилей делаем поле выбора неактивным и устанавливаем значение
+                calculationTypeSelect.setAttribute('disabled', 'true');
+                calculationTypeSelect.value = 'angle_stabilization';
+            } else {
+                // Для других профилей делаем поле выбора активным
+                calculationTypeSelect.removeAttribute('disabled');
+            }
+        }
+
+        // Вызываем функцию при загрузке страницы
+        document.addEventListener('DOMContentLoaded', changeFields);
+    </script>
+</body>
+</html> 
