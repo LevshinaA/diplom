@@ -338,7 +338,7 @@ def calculate_horizontal():
                 results=results['table_data']
             )
             results['calculation_id'] = calculation_id
-            results['input_data'] = {'type_ha': data['type_ha'], 'type_h': data['type_h']}
+            results['input_data'] = data
             # Добавляем well_type в результаты для сессии
             results['well_type'] = 2
             

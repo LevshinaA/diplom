@@ -83,6 +83,9 @@ def calc_four_int(H_h, A_h, ang_h, length_hor, radius_curve_2, radius_curve_3, z
             'Hb_h': round(Hb_h, 2),
             'V_4_h': round(V_4_h, 2),
             'V_5_h': round(V_5_h, 2),
+            'W_5_h': round(W_4_h, 2),
+            'W_4_h': round(W_5_h, 2),
+            'R_r_h': round(R_r_h, 2),
             'input_data': {
                 'H_h': H_h,
                 'A_h': A_h,
@@ -169,6 +172,7 @@ def calc_four_int_tangential(H_h, A_h, ang_h, length_hor, radius_curve_2, radius
             'Hb_h': round(Hb_h, 2),
             'W_1_h': round(W_1_h, 2),
             'L_h': round(L_h, 2),
+            'V_1_h': round(V_1_h,2),
             'input_data': {
                 'H_h': H_h,
                 'A_h': A_h,
@@ -266,6 +270,9 @@ def calc_five_int(H_h, A_h, ang_h, length_hor, radius_curve_2, radius_curve_4, r
             'Hb_h': round(Hb_h, 2),
             'V_2_h': round(V_2_h, 2),
             'W_3_h': round(W_3_h, 2),
+            'V_3_h': round(V_3_h, 2),
+            'W_2_h': round(W_2_h, 2),
+            'L_h': round(L_h, 2),
             'input_data': {
                 'H_h': H_h,
                 'A_h': A_h,

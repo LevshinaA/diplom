@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Результаты расчета</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         :root {
             --primary-color: #2196F3;
@@ -88,34 +90,88 @@
 
         .results-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            gap: 2rem;
+            margin: 2rem 0;
         }
 
         .result-card {
-            background: rgba(33, 150, 243, 0.05);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .result-card h3 {
-            color: var(--primary-color);
-            margin-bottom: 10px;
-            font-size: 1.2em;
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #3498db;
         }
 
-        .result-value {
-            font-size: 1.5em;
+        .result-card h4 {
+            color: #34495e;
+            font-size: 1.1rem;
+            margin: 1rem 0;
+            padding: 0.8rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .result-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .result-card li {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .result-card li b {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        /* Стили для формул */
+        .formula {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid #3498db;
+        }
+
+        .formula-title {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .formula-expression {
+            color: #34495e;
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+        }
+
+        .formula-result {
+            color: #27ae60;
             font-weight: 500;
-            color: var(--text-primary);
+            margin-top: 0.5rem;
         }
 
-        .result-unit {
-            color: var(--text-secondary);
-            font-size: 0.9em;
-            margin-left: 5px;
+        /* Стили для единиц измерения */
+        .unit {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-left: 0.3rem;
         }
 
         .results-table {
@@ -210,6 +266,22 @@
                 width: 100%;
                 text-align: center;
             }
+
+            .result-card {
+                padding: 1rem;
+            }
+
+            .result-card h3 {
+                font-size: 1.3rem;
+            }
+
+            .result-card h4 {
+                font-size: 1rem;
+            }
+
+            .result-card li {
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
@@ -257,7 +329,7 @@
                                     {% endif %})
                                 {% endif %}
                             {% else %}
-                                Горизонтальная
+                            Горизонтальная
                             {% endif %}
                         {% elif results.profile_type == 1 %}
                             Трехинтервальный
@@ -365,6 +437,91 @@
                     </table>
                 {% endif %}
 
+                <!-- Расчеты для наклонной скважины -->
+                {% if results.well_type == 1 %}
+                    <!-- Расчеты для трехинтервального профиля (если применимо) -->
+                    {% if results.profile_type|int == 1 %}
+                        <div class="results-grid">
+                            <div class="result-card">
+                                <h3>Расчеты для трехинтервального профиля</h3>
+                                <h4>$$H0 =  H - Hv$$</h4>
+                                <h4>\({{ results.input_data.H }} - {{ results.input_data.Hv }} = {{ results.H0 }}\)</h4>
+                                <h4>$$\alpha1 = 2 \times \text{degrees}\left(\text{atan}\left(\frac{H_0 - \sqrt{H_0^2 - A(2R_1 - A)}}{2R_1 - A}\right)\right)$$</h4>
+                                <h4>\(2 \times \text{degrees}\left(\text{atan}\left(\frac{ {{ results.H0 }} - \sqrt{ {{ results.H0 }}^2 - {{ results.input_data.A }} \times (2 \times {{ results.input_data.R1 }} - {{ results.input_data.A }}) } }{ 2 \times {{ results.input_data.R1 }} - {{ results.input_data.A }} }\right)\right) = {{ results.alpha1 }}°\)</h4>
+                                <h4>$$L = \frac{A - R_1 \times (1 - \cos(\alpha_1))}{\sin(\alpha_1)}$$</h4>
+                                <h4>\( \frac{ {{ results.input_data.A }} - {{ results.input_data.R1 }} \times (1 - \cos({{ results.alpha1 }})) }{ \sin({{ results.alpha1 }}) } = {{ results.L }} \)</h4>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Расчеты для четырехинтервального профиля (если применимо) -->
+                    {% if results.profile_type|int == 2 %}
+                        <div class="results-grid">
+                            <div class="result-card">
+                                <h3>Расчеты для четырехинтервального профиля</h3>
+                                <h4>$$H_0 = H - H_v$$</h4>
+                                <h4>\( {{ results.input_data.H }} - {{ results.input_data.Hv }} = {{ results.H_0 }} \)</h4>
+                                <h4>$$Q_1 = H_0 - R_1 \times \sin(\theta_1)$$</h4>
+                                <h4>\( {{ results.H_0 }} - {{ results.input_data.R1 }} \times \sin({{ results.input_data.initial_angle }}) = {{ results.Q_1 }} \)</h4>
+                                <h4>$$B = R_1 \times (1 - \cos(\theta_1)) + Q_1 \times \tan(\theta_1)$$</h4>
+                                <h4>\( {{ results.input_data.R1 }} \times (1 - \cos({{ results.input_data.initial_angle }})) + {{ results.Q_1 }} \times \tan({{ results.input_data.initial_angle }}) = {{ results.B }} \)</h4>
+                                <h4>$$C = \frac{Q_1}{\cos(\theta_1)} + |A - B| \times \sin(\theta_1)$$</h4>
+                                <h4>\( \frac{ {{ results.Q_1 }} }{ \cos({{ results.input_data.initial_angle }}) } + |{{ results.input_data.A }} - {{ results.B }}| \times \sin({{ results.input_data.initial_angle }}) = {{ results.C }} \)</h4>
+                                <h4>$$T = |A - B| \times \cos(\theta_1)$$</h4>
+                                <h4>\( |{{ results.input_data.A }} - {{ results.B }}| \times \cos({{ results.input_data.initial_angle }}) = {{ results.T }} \)</h4>
+                                <h4>$$T_0 = \frac{R_2 \times (R_2 - T) + C \times \sqrt{C^2 + T^2 - 2 \times T \times R_2}}{(R_2 - T)^2 + C^2}$$</h4>
+                                <h4>\( \frac{ {{ results.input_data.R2 }} \times ({{ results.input_data.R2 }} - {{ results.T }}) + {{ results.C }} \times \sqrt{  {{ results.C }}^2 + {{ results.T }}^2 - 2 \times {{ results.T }} \times {{ results.input_data.R2 }}}} { ({{ results.input_data.R2 }} - {{ results.T }})^2 + {{ results.C }}^2 } = {{ results.T_0 }} \)</h4>
+                                <h4>$$\theta_2 = 90° - \arctan\left(\frac{T_0}{\sqrt{1 - T_0^2}}\right) + \theta_1$$</h4>
+                                <h4>\( 90° - \arctan\left(\frac{ {{ results.T_0 }} }{ \sqrt{1 - {{ results.T_0 }}^2} }\right) + {{ results.input_data.initial_angle }} = {{ results.ang_2 }}° \)</h4>
+                                <h4>$$H_{ost} = H_0 - R_1 \times \sin(\theta_1) - R_2 \times (\sin(\theta_2) - \sin(\theta_1))$$</h4>
+                                <h4>\( {{ results.H_0 }} - {{ results.input_data.R1 }} \times \sin({{ results.input_data.initial_angle }}) - {{ results.input_data.R2 }} \times (\sin({{ results.ang_2 }}) - \sin({{ results.input_data.initial_angle }})) = {{ results.H_ost }} \)</h4>
+                                <h4>$$A_{ost} = A - R_1 \times (1 - \cos(\theta_1)) - R_2 \times (\cos(\theta_1) - \cos(\theta_2))$$</h4>
+                                <h4>\( {{ results.input_data.A }} - {{ results.input_data.R1 }} \times (1 - \cos({{ results.input_data.initial_angle }})) - {{ results.input_data.R2 }} \times (\cos({{ results.input_data.initial_angle }}) - \cos({{ results.ang_2 }})) = {{ results.A_ost }} \)</h4>
+                                <h4>$$L_n = \sqrt{H_{ost}^2 + A_{ost}^2}$$</h4>
+                                <h4>\( \sqrt{ {{ results.H_ost }}^2 + {{ results.A_ost }}^2 } = {{ results.L_n }} \)</h4>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Расчеты для J-образного профиля (если применимо) -->
+                    {% if results.profile_type|int == 4 %}
+                         <div class="results-grid">
+                            <div class="result-card">
+                                <h3>Расчеты для J-образного профиля</h3>
+                                <h4>$$B = R_1 \times (1 - \cos(\theta_1)) + (H - H_v - R_1 \times \sin(\theta_1)) \times \tan(\theta_1)$$</h4>
+                                <h4>\( {{ results.input_data.R1 }} \times (1 - \cos({{ results.input_data.initial_angle }})) + ({{ results.input_data.H }} - {{ results.input_data.Hv }} - {{ results.input_data.R1 }} \times \sin({{ results.input_data.initial_angle }})) \times \tan({{ results.input_data.initial_angle }}) = {{ results.B }} \)</h4>
+                                <h4>$$Q_{sqrt\_arg} = \sqrt{ 2 \times R_4 \times |A - B| \times \cos(\theta_1) - (A - B)^2 \times \cos^2(\theta_1)}$$</h4>
+                                <h4>\(\sqrt{ 2 \times {{ results.input_data.R4 }} \times |{{ results.input_data.A }} - {{ results.B }}| \times \cos({{ results.input_data.initial_angle }}) - ({{ results.input_data.A }} - {{ results.B }})^2 \times \cos({{ results.input_data.initial_angle }})^2} = {{ results.Q_sqrt_arg_val }} \)</h4>
+                                <h4>$$C = \frac{H - H_v - R_1 \times \sin(\theta_1)}{\cos(\theta_1)} + |A - B| \times \sin(\theta_1)$$</h4>
+                                <h4>\( \frac{ {{ results.input_data.H }} - {{ results.input_data.Hv }} - {{ results.input_data.R1 }} \times \sin({{ results.input_data.initial_angle }})  }{ \cos({{ results.input_data.initial_angle }})  } + |{{ results.input_data.A }} - {{ results.B }}| \times \sin({{ results.input_data.initial_angle }})  = {{ results.C }} \)</h4>
+                                <h4>$$L = C - Q$$</h4>
+                                <h4>\( {{ results.C }} - {{ results.Q }} = {{ results.L }} \)</h4>
+                                <h4>$$\theta_p = \theta_1 + \arctan(\frac{Q}{\sqrt{R_4^2 - Q^2}})$$</h4>
+                                <h4>\({{ results.input_data.initial_angle }} + \arctan\left( \frac{ {{ results.Q }} }{ \sqrt{ {{ results.input_data.R4 }}^2 - {{ results.Q }}^2 } } \right) = {{ results.ang_p_degrees }}°\)</h4> 
+                             </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Расчеты для S-образного профиля (если применимо) -->
+                    {% if results.profile_type|int == 3 %}
+                         <div class="results-grid">
+                            <div class="result-card">
+                                <h3>Расчеты для S-образного профиля</h3>
+                                <h4>$$B = R_1 \times (1 - \cos(\theta_1)) + (H - H_v - R_1 \times \sin(\theta_1)) \times \tan(\theta_1)$$</h4>
+                                <h4>\( {{ results.input_data.R1 }} \times (1 - \cos({{ results.input_data.initial_angle }})) + ({{ results.input_data.H }} - {{ results.input_data.Hv }} - {{ results.input_data.R1 }} \times \sin({{ results.input_data.initial_angle }})) \times \tan({{ results.input_data.initial_angle }}) = {{ results.B }} \)</h4>
+                                <h4>$$Q_{sqrt\_arg} = \sqrt{ 2 \times R_4 \times |A - B| \times \cos(\theta_1) - (A - B)^2 \times \cos^2(\theta_1)}$$</h4>
+                                <h4>\(\sqrt{ 2 \times {{ results.input_data.R4 }} \times |{{ results.input_data.A }} - {{ results.B }}| \times \cos({{ results.input_data.initial_angle }}) - ({{ results.input_data.A }} - {{ results.B }})^2 \times \cos({{ results.input_data.initial_angle }})^2} = {{ results.Q_sqrt_arg_val }} \)</h4>
+                                <h4>$$C = \frac{H - H_v - R_1 \times \sin(\theta_1)}{\cos(\theta_1)} + |A - B| \times \sin(\theta_1)$$</h4>
+                                <h4>\( \frac{ {{ results.input_data.H }} - {{ results.input_data.Hv }} - {{ results.input_data.R1 }} \times \sin({{ results.input_data.initial_angle }})  }{ \cos({{ results.input_data.initial_angle }})  } + |{{ results.input_data.A }} - {{ results.B }}| \times \sin({{ results.input_data.initial_angle }})  = {{ results.C }} \)</h4>
+                                <h4>$$L = C - Q$$</h4>
+                                <h4>\( {{ results.C }} - {{ results.Q }} = {{ results.L }} \)</h4>
+                                <h4>$$\theta_p = \theta_1 - \arctan(\frac{Q}{\sqrt{R_4^2 - Q^2}})$$</h4>
+                                <h4>\({{ results.input_data.initial_angle }} - \arctan\left( \frac{ {{ results.Q }} }{ \sqrt{ {{ results.input_data.R4 }}^2 - {{ results.Q }}^2 } } \right) = {{ results.ang_p_degrees }}°\)</h4> 
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endif %}
+
                 <!-- Блок для горизонтальных скважин -->
                 {% if results.horizontal_results %}
                     <div class="results-grid">
@@ -399,6 +556,79 @@
                             {% endfor %}
                         </tbody>
                     </table>
+                {% endif %}
+
+                <!-- Расчеты для горизонтальной скважины -->
+                {% if results.input_data and results.input_data.type_ha is defined %}
+                    <div class="results-grid">
+                        <div class="result-card">
+                            <h3>Расчеты для горизонтальной скважины</h3>
+                            <ul>
+                                {% if results.input_data.type_ha|int == 1 %}
+                                    <!-- Двухинтервальный профиль -->
+                                        <h4>$$Hb_h = H_h - \frac{A_h \times \sin(\alpha_h)}{1 - \cos(\alpha_h)}$$</h4>
+                                        <h4>\( {{ results.input_data.H_h }} - \frac{ {{ results.input_data.A_h }} \times \sin({{ results.input_data.ang_h }}) }{ 1 - \cos({{ results.input_data.ang_h }}) } = {{ results.Hb_h }} \text{ м} \)</h4>
+                                        <h4>$$R_h = \frac{H_h - Hb_h}{\sin(\alpha_h)}$$</h4>
+                                        <h4>\( \frac{ {{ results.input_data.H_h }} - {{ results.Hb_h }} }{ \sin({{ results.input_data.ang_h }}) } = {{ results.R_h }} \text{ м} \)</h4>
+                                        <h4>$$I_h = \frac{573}{R_h}$$</h4>
+                                        <h4>\( \frac{573}{ {{ results.R_h }} } = {{ results.I_h }} \text{ град./10м} \)</h4>
+                                    
+                                {% elif results.input_data.type_ha|int == 2 %}
+                                     <!-- Трехинтервальный профиль -->
+                                         <h4>$$R_{2h} = \frac{A_h - R_{curv2}(1 - \cos(\theta_{zenith}))}{\cos(\theta_{zenith}) - \cos(\alpha_h)}$$</h4>
+                                         <h4>\( \frac{ {{ results.input_data.A_h }} - {{ results.input_data.radius_curve_2 }} (1 - \cos({{ results.input_data.zenith_angle }})) }{ \cos({{ results.input_data.zenith_angle }}) - \cos({{ results.input_data.ang_h }}) } = {{ results.R_2_h }} \text{ м} \)</h4>
+                                         <h4>$$Hb_h = H_h - R_{curv2}\sin(\theta_{zenith}) - R_{2h}(\sin(\alpha_h) - \sin(\theta_{zenith}))$$</h4>
+                                         <h4>\( {{ results.input_data.H_h }} - {{ results.input_data.radius_curve_2 }} \sin({{ results.input_data.zenith_angle }}) - {{ results.R_2_h }} (\sin({{ results.input_data.ang_h }}) - \sin({{ results.input_data.zenith_angle }})) = {{ results.Hb_h }} \text{ м} \)</h4>
+                                         <h4>$$I_{1h} = \frac{573}{R_{curv2}}$$</h4>
+                                         <h4>\( \frac{573}{ {{ results.input_data.radius_curve_2 }} } = {{ results.I_1_h }} \text{ град./10м} \)</h4>
+                                         <h4>$$I_{2h} = \frac{573}{R_{2h}}$$</h4>
+                                         <h4>\( \frac{573}{ {{ results.R_2_h }} } = {{ results.I_2_h }} \text{ град./10м} \)</h4>
+                                    
+                                {% elif results.input_data.type_ha|int == 3 %}
+                                     <!-- Четырехинтервальный тангенциальный профиль -->
+                                         <h4>$$W_{1h} = \sin(\alpha_h) - \sin(\theta_{zenith})$$</h4>
+                                         <h4>\( \sin({{ results.input_data.ang_h }}) - \sin({{ results.input_data.zenith_angle }}) = {{ results.W_1_h }} \)</h4>
+                                         <h4>$$V_{1h} = \cos(\theta_{zenith}) - \cos(\alpha_h)$$</h4>
+                                         <h4>\( \cos({{ results.input_data.zenith_angle }}) - \cos({{ results.input_data.ang_h }}) = {{ results.V_1_h }} \)</h4>
+                                         <h4>$$L_h = \frac{A_h - (1 - \cos(\theta_{zenith}))R_{curv2} - R_{curv4}V_{1h}}{\sin(\theta_{zenith})}$$</h4>
+                                         <h4>\( \frac{ {{ results.input_data.A_h }} - (1 - \cos({{ results.input_data.zenith_angle }})) {{ results.input_data.radius_curve_2 }} - {{ results.input_data.radius_curve_4 }} {{ results.V_1_h }} }{ \sin({{ results.input_data.zenith_angle }}) } = {{ results.L_h }} \text{ м} \)</h4>
+                                         <h4>$$Hb_h = H_h - R_{curv2}\sin(\theta_{zenith}) - R_{curv4}W_{1h} - L_h\cos(\theta_{zenith})$$</h4>
+                                         <h4>\( {{ results.input_data.H_h }} - {{ results.input_data.radius_curve_2 }} \sin({{ results.input_data.zenith_angle }}) - {{ results.input_data.radius_curve_4 }} {{ results.W_1_h }} - {{ results.L_h }} \cos({{ results.input_data.zenith_angle }}) = {{ results.Hb_h }} \text{ м} \)</h4>
+                                   
+                                {% elif results.input_data.type_ha|int == 4 %}
+                                     <!-- Пятиинтервальный профиль -->
+                                         <h4>$$V_{2h} = \cos(\theta_{zenith}) - \cos(\alpha_4)$$</h4>
+                                         <h4>\( \cos({{ results.input_data.zenith_angle }}) - \cos({{ results.input_data.angle_4 }}) = {{ results.V_2_h }} \)</h4>
+                                         <h4>$$V_{3h} = \cos(\alpha_4) - \cos(\alpha_h)$$</h4>
+                                         <h4>\( \cos({{ results.input_data.angle_4 }}) - \cos({{ results.input_data.ang_h }}) = {{ results.V_3_h }} \)</h4>
+                                         <h4>$$W_{2h} = \sin(\alpha_4) - \sin(\theta_{zenith})$$</h4>
+                                         <h4>\( \sin({{ results.input_data.angle_4 }}) - \sin({{ results.input_data.zenith_angle }}) = {{ results.W_2_h }} \)</h4>
+                                         <h4>$$W_{3h} = \sin(\alpha_h) - \sin(\alpha_4)$$</h4>
+                                         <h4>\( \sin({{ results.input_data.ang_h }}) - \sin({{ results.input_data.angle_4 }}) = {{ results.W_3_h }} \)</h4>
+                                         <h4>$$L_h = \frac{A_h - (1 - \cos(\theta_{zenith}))R_{curv2} - R_{curv4}V_{2h} - R_{curv5}V_{3h}}{\sin(\theta_{zenith})}$$</h4>
+                                         <h4>\( \frac{ {{ results.input_data.A_h }} - (1 - \cos({{ results.input_data.zenith_angle }})) {{ results.input_data.radius_curve_2 }} - {{ results.input_data.radius_curve_4 }} {{ results.V_2_h }} - {{ results.input_data.radius_curve_5 }} {{ results.V_3_h }} }{ \sin({{ results.input_data.zenith_angle }}) } = {{ results.L_h }} \text{ м} \)</h4>
+                                         <h4>$$Hb_h = H_h - R_{curv2}\sin(\theta_{zenith}) - R_{curv4}W_{2h} - R_{curv5}W_{3h} - L_h\cos(\theta_{zenith})$$</h4>
+                                         <h4>\( {{ results.input_data.H_h }} - {{ results.input_data.radius_curve_2 }} \sin({{ results.input_data.zenith_angle }}) - {{ results.input_data.radius_curve_4 }} {{ results.W_2_h }} - {{ results.input_data.radius_curve_5 }} {{ results.W_3_h }} - {{ results.L_h }} \cos({{ results.input_data.zenith_angle }}) = {{ results.Hb_h }} \text{ м} \)</h4>
+                                    
+                                {% elif results.input_data.type_ha|int == 5 %}
+                                     <!-- Четырехинтервальный профиль -->
+                                         <h4>$$W_{4h} = \sin(\alpha_3) - \sin(\theta_{zenith})$$</h4>
+                                         <h4>\( \sin({{ results.input_data.angle_3 }}) - \sin({{ results.input_data.zenith_angle }}) = {{ results.W_4_h }} \)</h4>
+                                         <h4>$$W_{5h} = \sin(\alpha_h) - \sin(\alpha_3)$$</h4>
+                                         <h4>\( \sin({{ results.input_data.ang_h }}) - \sin({{ results.input_data.angle_3 }}) = {{ results.W_5_h }} \)</h4>
+                                         <h4>$$V_{4h} = \cos(\theta_{zenith}) - \cos(\alpha_3)$$</h4>
+                                         <h4>\( \cos({{ results.input_data.zenith_angle }}) - \cos({{ results.input_data.angle_3 }}) = {{ results.V_4_h }} \)</h4>
+                                         <h4>$$V_{5h} = \cos(\alpha_3) - \cos(\alpha_h)$$</h4>
+                                         <h4>\( \cos({{ results.input_data.angle_3 }}) - \cos({{ results.input_data.ang_h }}) = {{ results.V_5_h }} \)</h4>
+                                         <h4>$$R_{rh} = \frac{A_h - R_{curv2}(1 - \cos(\theta_{zenith})) - R_{curv3}V_{4h}}{V_{5h}}$$</h4>
+                                         <h4>\( \frac{ {{ results.input_data.A_h }} - {{ results.input_data.radius_curve_2 }} (1 - \cos({{ results.input_data.zenith_angle }})) - {{ results.input_data.radius_curve_3 }} {{ results.V_4_h }} }{ {{ results.V_5_h }} } = {{ results.R_r_h }} \text{ м} \)</h4>
+                                         <h4>$$Hb_h = H_h - R_{curv2}\sin(\theta_{zenith}) - R_{curv3}W_{4h} - R_{rh}W_{5h}$$</h4>
+                                         <h4>\( {{ results.input_data.H_h }} - {{ results.input_data.radius_curve_2 }} \sin({{ results.input_data.zenith_angle }}) - {{ results.input_data.radius_curve_3 }} {{ results.W_4_h }} - {{ results.R_r_h }} {{ results.W_5_h }} = {{ results.Hb_h }} \text{ м} \)</h4>
+                                    
+                                {% endif %}
+                            </ul>
+                        </div>
+                </div>
                 {% endif %}
 
             {% endif %}

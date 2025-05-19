@@ -87,6 +87,10 @@ def calculate_profile(H, A, Hv, R1, calculation_type='angle_stabilization', H_en
         alpha1 = 2 * degrees(atan((H0 - sqrt(discriminant))/div_nul))
         L = (A - R1*(1 - cos(radians(alpha1))))/sin(radians(alpha1))
 
+        alpha1_rad = radians(alpha1)
+        sin_alpha1 = sin(alpha1_rad)
+        cos_alpha1 = cos(alpha1_rad)
+
         table_data = {
             'headers': create_table_headers(),
             'rows': [
@@ -117,7 +121,9 @@ def calculate_profile(H, A, Hv, R1, calculation_type='angle_stabilization', H_en
             'input_data': {
                 'H': H, 'A': A, 'Hv': Hv, 'R1': R1,
                 'calculation_type': calculation_type, 'H_end': H_end
-            }
+            },
+            'sin_alpha1': round(sin_alpha1, 4), # Add sin(alpha1) result
+            'cos_alpha1': round(cos_alpha1, 4) 
         }
     except Exception as e:
         return {
@@ -147,6 +153,7 @@ def calculate_four_interval_profile(H, A, Hv, R1, initial_angle, R2, calculation
         H_ost = H_0 - R1 * sin(radians(initial_angle)) - R2 * (sin(radians(ang_2)) - sin(radians(initial_angle)))
         A_ost = A - R1 * (1 - cos(radians(initial_angle))) - R2 * (cos(radians(initial_angle)) - cos(radians(ang_2)))
         L_n = sqrt(H_ost ** 2 + A_ost ** 2)
+
 
         table_data = {
             'headers': create_table_headers(),
@@ -180,20 +187,23 @@ def calculate_four_interval_profile(H, A, Hv, R1, initial_angle, R2, calculation
         return {
             'initial_angle_degrees': round(initial_angle, 2),
             'second_angle_degrees': round(ang_2, 2),
-            'H0': round(H_0, 2),
-            'Q1': round(Q_1, 2),
+            'H_0': round(H_0, 2),
+            'Q_1': round(Q_1, 2),
             'B': round(B, 2),
             'A1': round(A_1, 2),
             'C': round(C, 2),
             'T': round(T, 2),
-            'KOR': round(KOR, 2),
-            'T0': round(T_0, 2),
+            'ang_2': round(ang_2, 2),
+            'T_0': round(T_0, 4),
+            'L_n': round(L_n, 2),
             'table_data': table_data,
             'input_data': {
                 'H': H, 'A': A, 'Hv': Hv, 'R1': R1,
                 'initial_angle': initial_angle, 'R2': R2,
                 'calculation_type': calculation_type, 'H_end': H_end
-            }
+            },
+            'H_ost': round(H_ost, 2),
+            'A_ost': round(A_ost, 2)
         }
     except Exception as e:
         return {
@@ -215,6 +225,7 @@ def calculate_j_shaped_profile(H, A, Hv, R1, initial_angle, R4, calculation_type
         L = C - Q
         ang_p = initial_angle + degrees(atan(Q / sqrt(R4 ** 2 - Q ** 2)))
 
+        
         table_data = {
             'headers': create_table_headers(),
             'rows': [
@@ -250,16 +261,16 @@ def calculate_j_shaped_profile(H, A, Hv, R1, initial_angle, R4, calculation_type
             'table_data': table_data,
             'input_data': {
                 'H': H, 'A': A, 'Hv': Hv, 'R1': R1,
-                'initial_angle': initial_angle, 'R1': R1, 'R4': R4,
+                'initial_angle': initial_angle, 'R4': R4,
                 'calculation_type': calculation_type, 'H_end': H_end
-            }
-        }
+            },
+          }
     except Exception as e:
         return {
             'error': str(e),
             'input_data': {
                 'H': H, 'A': A, 'Hv': Hv, 'R1': R1,
-                'initial_angle': initial_angle, 'R1': R1, 'R4': R4,
+                'initial_angle': initial_angle, 'R4': R4,
                 'calculation_type': calculation_type, 'H_end': H_end
             }
         }
@@ -273,6 +284,7 @@ def calculate_s_shaped_profile(H, A, Hv, R1, initial_angle, R4, calculation_type
         L = C - Q
         ang_p = initial_angle - degrees(atan(Q / sqrt(R4 ** 2 - Q ** 2)))
 
+       
         table_data = {
             'headers': create_table_headers(),
             'rows': [
@@ -310,7 +322,7 @@ def calculate_s_shaped_profile(H, A, Hv, R1, initial_angle, R4, calculation_type
                 'H': H, 'A': A, 'Hv': Hv, 'R1': R1,
                 'initial_angle': initial_angle, 'R4': R4,
                 'calculation_type': calculation_type, 'H_end': H_end
-            }
+            },
         }
     except Exception as e:
         return {
