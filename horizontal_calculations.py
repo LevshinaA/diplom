@@ -350,6 +350,7 @@ def calc_three_int(H_h, A_h, ang_h, length_hor, radius_curve_2, zenith_angle, ty
             'Hb_h': round(Hb_h, 2),
             'R_2_h': round(R_2_h, 2),
             'I_1_h': round(I_1_h, 2),
+            'I_2_h': round(I_2_h, 2),
             'input_data': {
                 'H_h': H_h,
                 'A_h': A_h,
