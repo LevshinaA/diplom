@@ -43,10 +43,6 @@
             cursor: pointer;
             color: #dc3545;
         }
-        .info-label {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
         .info-value {
             margin-bottom: 10px;
         }
@@ -90,6 +86,26 @@
         .download-button:hover {
             background-color: #218838;
         }
+        .sort-buttons {
+            margin-bottom: 20px;
+        }
+        .sort-button {
+            padding: 8px 16px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .sort-button:hover {
+            background-color: #f8f9fa;
+        }
+        .sort-button.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
     </style>
 </head>
 <body>
@@ -99,18 +115,23 @@
         </div>
         
         <div class="main-content">
-            <h2>История расчетов</h2>
+            <h2>История расчетов</h2><br>
+            <div class="sort-buttons">
+                <button class="sort-button active" onclick="sortCalculations('all')">Все</button>
+                <button class="sort-button" onclick="sortCalculations('directional')">Наклонные</button>
+                <button class="sort-button" onclick="sortCalculations('horizontal')">Горизонтальные</button>
+            </div>
             <div class="row">
                 <div class="col-md-6">
                     {% if calculations %}
                         <ul class="calculation-list">
                             {% for calc in calculations %}
-                                <li class="calculation-item" onclick="showResults('{{ calc.id }}')">
+                                <li class="calculation-item" onclick="showResults('{{ calc.id }}')" data-type="{{ calc.type }}">
                                     <button class="delete-btn" onclick="deleteCalculation(event, '{{ calc.id }}')">&times;</button>
-                                    <div class="info-label">Глубина скважины:</div>
-                                    <div class="info-value">{{ calc.depth }} м</div>
+                                 
                                     <div class="info-value">
                                         {% if calc.type == 1 %}
+                                        <b>Наклонная</b><br>
                                             {% if calc.profile_type == 1 %}
                                                 Трехинтервальный
                                             {% elif calc.profile_type == 2 %}
@@ -123,7 +144,7 @@
                                                 Неизвестный тип
                                             {% endif %}
                                         {% else %}
-                                            Горизонтальная
+                                            <b>Горизонтальная</b><br>
                                             {% if calc.type_ha == 1 %}
                                                 (Двухинтервальный)
                                             {% elif calc.type_ha == 2 %}
@@ -134,7 +155,7 @@
                                                 (Пятиинтервальный-тангенциальный)
                                             {% elif calc.type_ha == 5 %}
                                                 (Четырехинтервальный)
-                                            {% endif %}
+                                            {% endif %}<br>
                                             {% if calc.type_h == 0 %}
                                                 Тангенциальный
                                             {% elif calc.type_h == -1 %}
@@ -169,6 +190,46 @@
 
     <script>
         let currentCalculationId = null;
+        let allCalculations = [];
+
+        // Сохраняем все расчеты при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            const calculationItems = document.querySelectorAll('.calculation-item');
+            calculationItems.forEach(item => {
+                allCalculations.push({
+                    element: item,
+                    type: item.getAttribute('data-type')
+                });
+            });
+        });
+
+        function sortCalculations(type) {
+            // Обновляем активную кнопку
+            document.querySelectorAll('.sort-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Скрываем все элементы
+            allCalculations.forEach(calc => {
+                calc.element.style.display = 'none';
+            });
+
+            // Показываем только нужные элементы
+            if (type === 'all') {
+                allCalculations.forEach(calc => {
+                    calc.element.style.display = 'block';
+                });
+            } else {
+                allCalculations.forEach(calc => {
+                    if (type === 'directional' && calc.type === '1') {
+                        calc.element.style.display = 'block';
+                    } else if (type === 'horizontal' && calc.type === '2') {
+                        calc.element.style.display = 'block';
+                    }
+                });
+            }
+        }
 
         function showResults(calculationId) {
             currentCalculationId = calculationId;
@@ -194,7 +255,6 @@
 
                     // Создаем таблицу с результатами
                     if (data.rows && data.rows.length > 0) {
-                        contentHtml += '<h3>Результаты расчета профиля</h3>';
                         contentHtml += '<table><thead><tr>';
                         data.headers.forEach(header => {
                             contentHtml += `<th>${header}</th>`;

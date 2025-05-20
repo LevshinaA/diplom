@@ -89,7 +89,6 @@
             display: block;
             margin-bottom: 8px;
             color: var(--text-primary);
-            font-weight: 500;
         }
 
         .form-group input, .form-group select {
@@ -189,19 +188,19 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="H">Проектная глубина, м</label>
-                            <input type="number" id="H" name="H" required>
+                            <input type="number" id="H" name="H"min="0" required>
                         </div>
                         <div class="form-group">
                             <label for="A">Смещение на проектной глубине, м</label>
-                            <input type="number" id="A" name="A" required>
+                            <input type="number" id="A" name="A" min="0" required>
                         </div>
                         <div class="form-group">
                             <label for="Hv">Глубина вертикального участка, м</label>
-                            <input type="number" id="Hv" name="Hv" required>
+                            <input type="number" id="Hv" name="Hv" min="0" required>
                         </div>
                         <div class="form-group">
                             <label for="R1">Радиус кривизны 2 участка, м</label>
-                            <input type="number" id="R1" name="R1" required>
+                            <input type="number" id="R1" name="R1" min="0" required>
                         </div>
                     </div>
                 </div>
@@ -215,11 +214,11 @@
                         </div>
                         <div class="form-group" id="r2-group">
                             <label for="R2">Радиус кривизны 3 участка, м</label>
-                            <input type="number" id="R2" name="R2">
+                            <input type="number" id="R2" min="0" min="0" name="R2">
                         </div>
                         <div class="form-group" id="r4-group">
                             <label for="R4">Радиус кривизны 4 участка, м</label>
-                            <input type="number" id="R4" name="R4">
+                            <input type="number" id="R4" min="0" min="0" name="R4">
                         </div>
                     </div>
                 </div>
@@ -236,7 +235,7 @@
                         </div>
                         <div class="form-group">
                             <label for="H_end">Конечная глубина, м</label>
-                            <input type="number" id="H_end" name="H_end">
+                            <input type="number" id="H_end" min="0" name="H_end">
                         </div>
                     </div>
                 </div>

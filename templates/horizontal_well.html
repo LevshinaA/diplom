@@ -50,7 +50,7 @@
             padding: 8px 16px;
             border-radius: 8px;
             transition: all 0.3s ease;
-            font-weight: 500;
+            font-weight: 150;
         }
 
         .nav a:hover {
@@ -89,7 +89,6 @@
             display: block;
             margin-bottom: 8px;
             color: var(--text-primary);
-            font-weight: 500;
         }
 
         .form-group input, .form-group select {
@@ -128,55 +127,15 @@
             background-color: var(--secondary-color);
             transform: translateY(-2px);
         }
-
-        .error-message {
-            color: var(--error-color);
-            margin-top: 5px;
-            font-size: 0.9em;
-        }
-        
-        
-        /* Стили для скрытых полей, если они не обрабатываются скриптом напрямую */
-        .hidden-field {
-            display: none;
-        }
-
-        /* Стили для заголовка страницы с типом скважины */
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        .page-header h2 {
-             color: var(--primary-color);
-             margin: 0; /* Убираем лишний отступ у заголовка */
-        }
-
         .select{
             margin-bottom: 30px;
             padding: 20px;
             background: rgba(33, 150, 243, 0.05);
             border-radius: 8px;
         }
-        .well-type-display {
-            background: rgba(33, 150, 243, 0.1);
-            color: var(--primary-color);
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: 500;
-        }
          @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
-            }
-             .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
             }
         }
     </style>
@@ -229,12 +188,12 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="depth" class="form-label">Проектная глубина профиля, м</label>
-                            <input type="number" class="form-control" id="depth" name="depth" step="0.01" required>
+                            <input type="number" class="form-control" id="depth" name="depth" step="0.01" min="0" required>
                         </div>
     
                         <div class="form-group">
                             <label for="displacement" class="form-label">Смещение профиля на проектной глубине, м</label>
-                            <input type="number" class="form-control" id="displacement" name="displacement" step="0.01" required>
+                            <input type="number" class="form-control" id="displacement" name="displacement" step="0.01" min="0" required>
                         </div>
     
                         <div class="form-group">
@@ -243,27 +202,27 @@
                         </div>
                         <div class="form-group" id="radiusCurve2Div">
                             <label for="radius_curve_2" class="form-label">Радиус кривизны 2 участка, м</label>
-                            <input type="number" class="form-control" id="radius_curve_2" name="radius_curve_2" step="0.01" required>
+                            <input type="number" class="form-control" id="radius_curve_2" name="radius_curve_2" min="0" step="0.01" required>
                         </div>
 
                         <div class="form-group" id="radiusCurve3Div">
                             <label for="radius_curve_3" class="form-label">Радиус кривизны 3 участка, м</label>
-                            <input type="number" class="form-control" id="radius_curve_3" name="radius_curve_3" step="0.01" required>
+                            <input type="number" class="form-control" id="radius_curve_3" name="radius_curve_3" step="0.01" min="0" required>
                         </div>
 
                         <div class="form-group" id="radiusCurve4Div">
                             <label for="radius_curve_4" class="form-label">Радиус кривизны 4 участка, м</label>
-                            <input type="number" class="form-control" id="radius_curve_4" name="radius_curve_4" step="0.01" required>
+                            <input type="number" class="form-control" id="radius_curve_4" name="radius_curve_4" step="0.01" min="0" required>
                         </div>
 
                         <div class="form-group" id="radiusCurve5Div">
                             <label for="radius_curve_5" class="form-label">Радиус кривизны 5 участка, м</label>
-                            <input type="number" class="form-control" id="radius_curve_5" name="radius_curve_5" step="0.01" required>
+                            <input type="number" class="form-control" id="radius_curve_5" name="radius_curve_5" step="0.01" min="0" required>
                         </div>
 
                         <div class="form-group" id="angle4Div">
                             <label for="angle_4" class="form-label">Угол в конце 4 участка, м</label>
-                            <input type="number" class="form-control" id="angle_4" name="angle_4" step="0.01" required>
+                            <input type="number" class="form-control" id="angle_4" name="angle_4" step="0.01" min="0" required>
                         </div>
 
                         <div class="form-group" id="angle3Div">
@@ -284,22 +243,22 @@
                     <div class="form-grid">
                         <div class="form-group" id="lengthHorDiv">
                             <label for="length_hor" class="form-label">Протяжённость горизонтального участка, м</label>
-                            <input type="number" class="form-control" id="length_hor" name="length_hor" step="0.01">
+                            <input type="number" class="form-control" id="length_hor" name="length_hor" min="0" step="0.01">
                         </div>
 
                         <div class="form-group" id="deviationDownDiv">
                             <label for="deviation_down" class="form-label">Допустимое отклонение вниз, м</label>
-                            <input type="number" class="form-control" id="deviation_down" name="deviation_down" step="0.01">
+                            <input type="number" class="form-control" id="deviation_down" name="deviation_down" min="0" step="0.01">
                         </div>
 
                         <div class="form-group" id="deviationUpDiv">
                             <label for="deviation_up" class="form-label">Допустимое отклонение вверх, м</label>
-                            <input type="number" class="form-control" id="deviation_up" name="deviation_up" step="0.01">
+                            <input type="number" class="form-control" id="deviation_up" name="deviation_up" min="0" step="0.01">
                         </div>
 
                         <div class="form-group" id="radiusCurveDiv">
                             <label for="radius_curve" class="form-label">Радиус кривизны участка А - В, м</label>
-                            <input type="number" class="form-control" id="radius_curve" name="radius_curve" step="0.01">
+                            <input type="number" class="form-control" id="radius_curve" name="radius_curve" min="0" step="0.01">
                         </div>
                     </div>
                  </div>
