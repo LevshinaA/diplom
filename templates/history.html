@@ -108,6 +108,10 @@
         #calculation-details {
             margin-top: 20px;
         }
+        .table-responsive {
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -172,7 +176,7 @@
                 <button class="sort-button" onclick="sortCalculations('horizontal')">Горизонтальные</button>
             </div>
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     {% if calculations %}
                         <ul class="calculation-list">
                             {% for calc in calculations %}
@@ -225,7 +229,7 @@
                         <p class="no-results">История расчетов пуста</p>
                     {% endif %}
                 </div>
-                <div class="col-md-6" id="details-section">
+                <div class="col-md-8" id="details-section">
                     <h2>Результаты расчета</h2>
                     <div id="calculation-details">
                         <p>Выберите расчет для просмотра</p>
@@ -306,6 +310,7 @@
                     // Создаем таблицу с результатами
                     if (data.rows && data.rows.length > 0) {
                         contentHtml += '<h2>Траектория скважины</h2>';
+                        contentHtml += '<div class="table-responsive">';
                         contentHtml += '<table><thead><tr>';
                         data.headers.forEach(header => {
                             contentHtml += `<th>${header}</th>`;
@@ -347,12 +352,14 @@
                             contentHtml += '</tr>';
                         });
                         contentHtml += '</tbody></table>';
+                        contentHtml += '</div>';
                         document.getElementById('download-excel').style.display = 'block';
                     }
 
                     // Добавляем данные горизонтальной части если они есть
                     if (data.horizontal_data && Object.keys(data.horizontal_data).length > 0) {
                         contentHtml += '<h3 class="mt-4">Результаты горизонтальной части</h3>';
+                        contentHtml += '<div class="table-responsive">';
                         contentHtml += '<table><thead><tr><th>Параметр</th><th>Значение</th></tr></thead><tbody>';
                         
                         const horizontalLabels = {
@@ -369,6 +376,7 @@
                             }
                         }
                         contentHtml += '</tbody></table>';
+                        contentHtml += '</div>';
                     }
 
                     detailsDiv.innerHTML = contentHtml || '<p>Нет данных для отображения</p>';
