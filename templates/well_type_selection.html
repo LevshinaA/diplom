@@ -14,6 +14,7 @@
             --text-primary: #2c3e50;
             --text-secondary: #7f8c8d;
             --border-color: #e0e0e0;
+            --error-color: #f44336;
         }
 
         * {
@@ -54,6 +55,13 @@
 
         .nav a:hover {
             background-color: rgba(33, 150, 243, 0.1);
+        }
+
+        .main-content {
+            background: var(--card-background);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .well-types {
@@ -101,7 +109,7 @@
 <body>
     <div class="container">
         <div class="nav">
-            <a href="/">На главную</a>
+            <a href="/history">История расчетов</a>
         </div>
 
         <div class="well-types">

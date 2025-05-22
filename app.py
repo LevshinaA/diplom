@@ -22,11 +22,7 @@ app.secret_key = 'your-secret-key-here'  # Необходимо для испо�
 init_db()
 
 @app.route('/')
-def home():
-    return render_template('index.html')
-
-@app.route('/well_type_selection')
-def well_type_selection():
+def index():
     return render_template('well_type_selection.html')
 
 @app.route('/directional_well')
